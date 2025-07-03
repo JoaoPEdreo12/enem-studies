@@ -1,94 +1,143 @@
+
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { useSupabaseEnemJourney } from '../hooks/useSupabaseEnemJourney';
 import { Sparkles, Smile, CheckCircle, Hourglass, ChevronRight } from 'lucide-react';
 
-// Lista dos principais conteúdos do ENEM por área (baseado em estatísticas públicas)
+// Conteúdos reorganizados por dificuldade e com mais tópicos
 const ENEM_CONTENTS = [
   {
     area: 'Matemática',
+    difficulty: 'Básico ao Avançado',
     topics: [
-      { name: 'Funções do 1º grau', percentage: '7%' },
-      { name: 'Funções do 2º grau', percentage: '6%' },
-      { name: 'Probabilidade', percentage: '8%' },
-      { name: 'Geometria Espacial', percentage: '9%' },
-      { name: 'Porcentagem', percentage: '10%' },
-      { name: 'Progressões (PA e PG)', percentage: '5%' },
-      { name: 'Trigonometria', percentage: '6%' },
-      { name: 'Estatística', percentage: '7%' },
-      { name: 'Análise Combinatória', percentage: '4%' },
-      { name: 'Geometria Plana', percentage: '8%' },
-      { name: 'Equações e Inequações', percentage: '7%' },
-      { name: 'Logaritmos', percentage: '3%' },
-      { name: 'Matrizes e Determinantes', percentage: '2%' },
-      { name: 'Gráficos e Tabelas', percentage: '10%' },
-      { name: 'Razão e Proporção', percentage: '6%' },
+      // Básico
+      { name: 'Operações Básicas', percentage: '8%', difficulty: 'Básico' },
+      { name: 'Porcentagem', percentage: '12%', difficulty: 'Básico' },
+      { name: 'Razão e Proporção', percentage: '8%', difficulty: 'Básico' },
+      { name: 'Regra de Três', percentage: '6%', difficulty: 'Básico' },
+      
+      // Intermediário
+      { name: 'Funções do 1º grau', percentage: '9%', difficulty: 'Intermediário' },
+      { name: 'Funções do 2º grau', percentage: '8%', difficulty: 'Intermediário' },
+      { name: 'Equações e Inequações', percentage: '7%', difficulty: 'Intermediário' },
+      { name: 'Progressões (PA e PG)', percentage: '6%', difficulty: 'Intermediário' },
+      { name: 'Geometria Plana', percentage: '10%', difficulty: 'Intermediário' },
+      { name: 'Estatística Básica', percentage: '9%', difficulty: 'Intermediário' },
+      
+      // Avançado
+      { name: 'Geometria Espacial', percentage: '11%', difficulty: 'Avançado' },
+      { name: 'Trigonometria', percentage: '8%', difficulty: 'Avançado' },
+      { name: 'Probabilidade', percentage: '9%', difficulty: 'Avançado' },
+      { name: 'Análise Combinatória', percentage: '5%', difficulty: 'Avançado' },
+      { name: 'Logaritmos', percentage: '4%', difficulty: 'Avançado' },
+      { name: 'Matrizes e Determinantes', percentage: '3%', difficulty: 'Avançado' }
     ]
   },
   {
     area: 'Linguagens',
+    difficulty: 'Básico ao Avançado',
     topics: [
-      { name: 'Interpretação de Texto', percentage: '25%' },
-      { name: 'Figuras de Linguagem', percentage: '8%' },
-      { name: 'Gêneros Textuais', percentage: '12%' },
-      { name: 'Gramática (Morfologia e Sintaxe)', percentage: '10%' },
-      { name: 'Funções da Linguagem', percentage: '5%' },
-      { name: 'Variação Linguística', percentage: '7%' },
-      { name: 'Literatura Brasileira', percentage: '15%' },
-      { name: 'Arte e Cultura', percentage: '3%' },
-      { name: 'Educação Física', percentage: '2%' },
-      { name: 'Tecnologias da Informação', percentage: '3%' },
-      { name: 'Coesão e Coerência', percentage: '10%' },
+      // Básico
+      { name: 'Interpretação de Texto', percentage: '30%', difficulty: 'Básico' },
+      { name: 'Gêneros Textuais', percentage: '15%', difficulty: 'Básico' },
+      { name: 'Funções da Linguagem', percentage: '8%', difficulty: 'Básico' },
+      { name: 'Variação Linguística', percentage: '7%', difficulty: 'Básico' },
+      
+      // Intermediário
+      { name: 'Figuras de Linguagem', percentage: '10%', difficulty: 'Intermediário' },
+      { name: 'Coesão e Coerência', percentage: '12%', difficulty: 'Intermediário' },
+      { name: 'Gramática (Sintaxe)', percentage: '8%', difficulty: 'Intermediário' },
+      { name: 'Semântica', percentage: '5%', difficulty: 'Intermediário' },
+      
+      // Avançado
+      { name: 'Literatura Brasileira', percentage: '18%', difficulty: 'Avançado' },
+      { name: 'Literatura Portuguesa', percentage: '8%', difficulty: 'Avançado' },
+      { name: 'Escolas Literárias', percentage: '6%', difficulty: 'Avançado' },
+      { name: 'Arte e Cultura', percentage: '4%', difficulty: 'Avançado' },
+      { name: 'Inglês/Espanhol', percentage: '10%', difficulty: 'Avançado' }
     ]
   },
   {
     area: 'Ciências Humanas',
+    difficulty: 'Básico ao Avançado',
     topics: [
-      { name: 'História do Brasil', percentage: '20%' },
-      { name: 'História Geral', percentage: '15%' },
-      { name: 'Geografia do Brasil', percentage: '18%' },
-      { name: 'Geopolítica', percentage: '10%' },
-      { name: 'Atualidades', percentage: '12%' },
-      { name: 'Filosofia', percentage: '8%' },
-      { name: 'Sociologia', percentage: '7%' },
-      { name: 'Cidadania e Direitos Humanos', percentage: '5%' },
-      { name: 'Economia', percentage: '3%' },
-      { name: 'Demografia', percentage: '2%' },
+      // Básico
+      { name: 'Atualidades', percentage: '15%', difficulty: 'Básico' },
+      { name: 'Cidadania e Direitos', percentage: '8%', difficulty: 'Básico' },
+      { name: 'Geografia do Brasil', percentage: '12%', difficulty: 'Básico' },
+      { name: 'História do Brasil Colonial', percentage: '8%', difficulty: 'Básico' },
+      
+      // Intermediário
+      { name: 'História do Brasil República', percentage: '15%', difficulty: 'Intermediário' },
+      { name: 'Geopolítica Mundial', percentage: '10%', difficulty: 'Intermediário' },
+      { name: 'Demografia e Urbanização', percentage: '7%', difficulty: 'Intermediário' },
+      { name: 'Sociologia Contemporânea', percentage: '8%', difficulty: 'Intermediário' },
+      
+      // Avançado
+      { name: 'História Geral Antiga/Medieval', percentage: '10%', difficulty: 'Avançado' },
+      { name: 'História Geral Moderna/Contemporânea', percentage: '12%', difficulty: 'Avançado' },
+      { name: 'Filosofia Clássica', percentage: '6%', difficulty: 'Avançado' },
+      { name: 'Filosofia Moderna', percentage: '5%', difficulty: 'Avançado' },
+      { name: 'Economia e Globalização', percentage: '4%', difficulty: 'Avançado' }
     ]
   },
   {
     area: 'Ciências da Natureza',
+    difficulty: 'Básico ao Avançado',
     topics: [
-      { name: 'Química Geral', percentage: '15%' },
-      { name: 'Físico-Química', percentage: '18%' },
-      { name: 'Química Orgânica', percentage: '12%' },
-      { name: 'Biologia Celular', percentage: '10%' },
-      { name: 'Genética', percentage: '13%' },
-      { name: 'Ecologia', percentage: '17%' },
-      { name: 'Física Mecânica', percentage: '10%' },
-      { name: 'Física Óptica', percentage: '5%' },
-      { name: 'Física Elétrica', percentage: '8%' },
-      { name: 'Astronomia', percentage: '2%' },
-      { name: 'Saúde e Meio Ambiente', percentage: '10%' },
+      // Básico - Biologia
+      { name: 'Citologia Básica', percentage: '8%', difficulty: 'Básico' },
+      { name: 'Ecologia e Meio Ambiente', percentage: '12%', difficulty: 'Básico' },
+      { name: 'Saúde e Qualidade de Vida', percentage: '10%', difficulty: 'Básico' },
+      
+      // Básico - Química
+      { name: 'Química Geral', percentage: '10%', difficulty: 'Básico' },
+      { name: 'Tabela Periódica', percentage: '6%', difficulty: 'Básico' },
+      
+      // Básico - Física
+      { name: 'Mecânica Básica', percentage: '8%', difficulty: 'Básico' },
+      { name: 'Energia e Trabalho', percentage: '7%', difficulty: 'Básico' },
+      
+      // Intermediário - Biologia
+      { name: 'Genética Mendeliana', percentage: '9%', difficulty: 'Intermediário' },
+      { name: 'Evolução', percentage: '8%', difficulty: 'Intermediário' },
+      { name: 'Fisiologia Humana', percentage: '7%', difficulty: 'Intermediário' },
+      
+      // Intermediário - Química
+      { name: 'Físico-Química', percentage: '12%', difficulty: 'Intermediário' },
+      { name: 'Química Orgânica', percentage: '10%', difficulty: 'Intermediário' },
+      
+      // Intermediário - Física
+      { name: 'Termodinâmica', percentage: '6%', difficulty: 'Intermediário' },
+      { name: 'Ondulatória', percentage: '5%', difficulty: 'Intermediário' },
+      
+      // Avançado
+      { name: 'Genética Molecular', percentage: '4%', difficulty: 'Avançado' },
+      { name: 'Química Inorgânica', percentage: '6%', difficulty: 'Avançado' },
+      { name: 'Eletromagnetismo', percentage: '4%', difficulty: 'Avançado' },
+      { name: 'Óptica Avançada', percentage: '3%', difficulty: 'Avançado' },
+      { name: 'Física Moderna', percentage: '2%', difficulty: 'Avançado' }
     ]
   },
   {
     area: 'Redação',
+    difficulty: 'Básico ao Avançado',
     topics: [
-      { name: 'Estrutura do Texto Dissertativo', percentage: '20%' },
-      { name: 'Competências do ENEM', percentage: '20%' },
-      { name: 'Proposta de Intervenção', percentage: '20%' },
-      { name: 'Coesão e Coerência', percentage: '15%' },
-      { name: 'Argumentação', percentage: '15%' },
-      { name: 'Repertório Sociocultural', percentage: '10%' },
+      { name: 'Estrutura Dissertativa', percentage: '25%', difficulty: 'Básico' },
+      { name: 'Competência 1 - Norma Culta', percentage: '20%', difficulty: 'Básico' },
+      { name: 'Competência 2 - Compreensão', percentage: '20%', difficulty: 'Intermediário' },
+      { name: 'Competência 3 - Argumentação', percentage: '20%', difficulty: 'Intermediário' },
+      { name: 'Competência 4 - Coesão', percentage: '15%', difficulty: 'Avançado' },
+      { name: 'Competência 5 - Proposta', percentage: '25%', difficulty: 'Avançado' },
+      { name: 'Repertório Sociocultural', percentage: '15%', difficulty: 'Avançado' }
     ]
   }
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'não iniciado', label: 'Não iniciado', icon: <Hourglass className="text-gray-400 animate-pulse" size={18} /> },
-  { value: 'em progresso', label: 'Em progresso', icon: <Sparkles className="text-yellow-400 animate-bounce" size={18} /> },
-  { value: 'dominado', label: 'Dominado', icon: <CheckCircle className="text-green-400 animate-bounce" size={18} /> },
+  { value: 'não iniciado', label: 'Não iniciado', icon: <Hourglass className="text-gray-400" size={16} /> },
+  { value: 'em progresso', label: 'Em progresso', icon: <Sparkles className="text-yellow-400" size={16} /> },
+  { value: 'dominado', label: 'Dominado', icon: <CheckCircle className="text-green-400" size={16} /> },
 ];
 
 // Avatar/Mascote estudante
@@ -138,192 +187,160 @@ export default function JornadaEnem({ user }: { user: any }) {
   const areaDominados = journey.filter(j => j.status === 'dominado' && j.area === selectedArea).length;
   const areaProgresso = Math.round((areaDominados / areaTotal) * 100);
 
-  // Encontra o índice do tópico atual (primeiro não dominado ou em progresso)
+  // Agrupar tópicos por dificuldade
+  const topicsByDifficulty = areaObj.topics.reduce((acc, topic) => {
+    const difficulty = topic.difficulty || 'Básico';
+    if (!acc[difficulty]) acc[difficulty] = [];
+    acc[difficulty].push(topic);
+    return acc;
+  }, {} as Record<string, typeof areaObj.topics>);
+
+  // Encontrar posição do avatar
   const currentTopicIdx = areaObj.topics.findIndex(topic => {
     const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status;
     return status === 'não iniciado' || status === 'em progresso';
   });
 
-  // Se todos estão dominados, coloca no último
-  const avatarPosition = currentTopicIdx === -1 ? areaObj.topics.length - 1 : currentTopicIdx;
-
   return (
-    <div className="space-y-8 fade-in-up">
-      <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-        Jornada ENEM
-        <Smile className="text-blue-400 animate-bounce" size={28} />
-      </h2>
-      <p className="text-gray-400 mb-6">Escolha a matéria e avance no seu tabuleiro de estudos! Marque seu progresso e veja sua evolução de forma gamificada.</p>
-      {/* Progresso geral compacto */}
-      <div className="mb-6 text-center">
-        <div className="inline-flex items-center gap-3 bg-gray-800/50 rounded-full px-4 py-2 border border-gray-600">
-          <span className="text-blue-400 font-bold text-lg">{progresso}%</span>
-          <span className="text-gray-300 text-sm">{dominados}/{total} concluídos</span>
+    <div className="jornada-enem-container">
+      <div className="jornada-header">
+        <h2 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+          <Smile className="text-blue-400 animate-bounce" size={32} />
+          Jornada ENEM
+          <Sparkles className="text-yellow-400 animate-pulse" size={28} />
+        </h2>
+        <p className="text-gray-300 mb-6 text-lg text-center max-w-3xl mx-auto">
+          Escolha a matéria e avance no seu tabuleiro de estudos! Conteúdos organizados por dificuldade para uma progressão natural.
+        </p>
+      </div>
+
+      {/* Progresso geral */}
+      <div className="progress-overview">
+        <div className="progress-card">
+          <div className="progress-circle">
+            <span className="progress-percentage">{progresso}%</span>
+          </div>
+          <div className="progress-info">
+            <h3>Progresso Geral</h3>
+            <p>{dominados}/{total} conteúdos dominados</p>
+          </div>
         </div>
       </div>
-      {/* Seleção de área/matéria compacta */}
-      <div className="subject-filters">
-        {ENEM_CONTENTS.map(area => (
-          <button
-            key={area.area}
-            onClick={() => setSelectedArea(area.area)}
-            className={`subject-filter-btn ${
-              selectedArea === area.area ? 'active' : 'inactive'
-            }`}
-          >
-            {area.area}
-          </button>
-        ))}
-      </div>
-      {/* Tabuleiro gamificado em zigue-zague */}
-      <div className="jornada-enem-board">
-        <div className="font-bold text-white text-xl mb-4 text-center animate-fade-in">{areaObj.area}</div>
 
-        {/* Container do caminho em zigue-zague */}
-        <div className="zigzag-path-container" style={{position:'relative', width:'100%', maxWidth:'700px', minHeight:'450px', margin:'0 auto'}}>
-
-          {/* Avatar do estudante na posição atual */}
-          <div style={{
-            position:'absolute',
-            top: `${Math.floor(avatarPosition / 2) * 140 + 30}px`,
-            left: avatarPosition % 2 === 0 ? '25%' : '75%',
-            transform: 'translate(-50%, -100%)',
-            zIndex: 15
-          }}>
-            <AvatarEstudante isActive={true} />
-          </div>
-
-          {areaObj.topics.map((topic, idx) => {
-            const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status || 'não iniciado';
-            const statusObj = STATUS_OPTIONS.find(opt => opt.value === status);
-            const isLeft = idx % 2 === 0;
-            const row = Math.floor(idx / 2);
-            const yPosition = row * 140 + 60;
-            const xPosition = isLeft ? '25%' : '75%';
-
-            return (
-              <div key={topic.name}>
-                {/* Linha de conexão em zigue-zague */}
-                {idx > 0 && (
-                  <svg 
-                    style={{
-                      position: 'absolute',
-                      top: idx % 2 === 1 ? `${yPosition - 60}px` : `${yPosition - 120}px`,
-                      left: 0,
-                      width: '100%',
-                      height: idx % 2 === 1 ? '60px' : '120px',
-                      zIndex: 1,
-                      pointerEvents: 'none'
-                    }}
-                  >
-                    {idx % 2 === 1 ? (
-                      // Linha horizontal da esquerda para a direita
-                      <path
-                        d={`M 25% 60 Q 50% 45 75% 60`}
-                        stroke="#3B82F6"
-                        strokeWidth="2"
-                        fill="none"
-                        strokeDasharray="6,3"
-                        className="animate-pulse"
-                        opacity="0.6"
-                      />
-                    ) : (
-                      // Linha diagonal para baixo
-                      <path
-                        d={`M 75% 0 Q 75% 60 25% 120`}
-                        stroke="#3B82F6"
-                        strokeWidth="2"
-                        fill="none"
-                        strokeDasharray="6,3"
-                        className="animate-pulse"
-                        opacity="0.6"
-                      />
-                    )}
-                  </svg>
-                )}
-
-                {/* Nó do tópico */}
-                <div style={{
-                  position: 'absolute',
-                  top: `${yPosition}px`,
-                  left: xPosition,
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 5
-                }}>
-                  {/* Círculo principal do tópico */}
-                  <div className={`topic-node ${
-                    status === 'dominado' 
-                      ? 'status-dominado' 
-                      : status === 'em progresso' 
-                        ? 'status-em-progresso' 
-                        : 'status-nao-iniciado'
-                  }`}>
-                    <div className="text-lg">
-                      {statusObj?.icon}
-                    </div>
-                  </div>
-
-                  {/* Label do tópico compacto */}
-                  <div className={`topic-label ${isLeft ? 'left' : 'right'}`} style={{
-                    [isLeft ? 'left' : 'right']: '40px',
-                    top: '50%',
-                    transform: 'translateY(-50%)'
-                  }}>
-                    <div className="topic-title">{topic.name} ({topic.percentage})</div>
-
-                    {/* Botões de status compactos */}
-                    <div className="status-controls">
-                      {STATUS_OPTIONS.map(opt => (
-                        <button
-                          key={opt.value}
-                          onClick={() => updateStatus(areaObj.area, topic.name, opt.value)}
-                          disabled={loading}
-                          className={`status-btn ${
-                            status === opt.value 
-                              ? 'status-btn-active' 
-                              : opt.value === 'não iniciado'
-                                ? 'status-btn-default'
-                                : opt.value === 'em progresso'
-                                  ? 'status-btn-warning'
-                                  : 'status-btn-success'
-                          }`}
-                          title={opt.label}
-                        >
-                          {opt.icon}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+      {/* Seleção de áreas */}
+      <div className="area-selector">
+        {ENEM_CONTENTS.map(area => {
+          const areaTotal = area.topics.length;
+          const areaDominados = journey.filter(j => j.status === 'dominado' && j.area === area.area).length;
+          const areaProgress = Math.round((areaDominados / areaTotal) * 100);
+          
+          return (
+            <button
+              key={area.area}
+              onClick={() => setSelectedArea(area.area)}
+              className={`area-card ${selectedArea === area.area ? 'active' : ''}`}
+            >
+              <div className="area-icon">
+                {area.area === 'Matemática' && '📊'}
+                {area.area === 'Linguagens' && '📚'}
+                {area.area === 'Ciências Humanas' && '🌍'}
+                {area.area === 'Ciências da Natureza' && '🔬'}
+                {area.area === 'Redação' && '✍️'}
               </div>
-            );
-          })}
+              <div className="area-info">
+                <h3>{area.area}</h3>
+                <p>{area.difficulty}</p>
+                <div className="area-progress-bar">
+                  <div 
+                    className="area-progress-fill" 
+                    style={{ width: `${areaProgress}%` }}
+                  ></div>
+                </div>
+                <span className="area-progress-text">{areaProgress}%</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Conteúdo da área selecionada */}
+      <div className="selected-area-content">
+        <div className="area-header">
+          <h3 className="area-title">
+            {areaObj.area} - {areaObj.difficulty}
+          </h3>
+          <div className="area-stats">
+            <span className="stat-badge">{areaProgresso}% concluído</span>
+            <span className="stat-badge">{areaDominados}/{areaTotal} tópicos</span>
+          </div>
         </div>
 
-        {/* Progresso da área */}
-        <div className="area-progress">
-          <div className="progress-badge">
-            <span className="progress-percentage">{areaProgresso}%</span>
-            <span>{areaObj.area}</span>
-          </div>
+        {/* Avatar do estudante */}
+        <div className="avatar-section">
+          <AvatarEstudante isActive={true} />
+          <p className="avatar-message">
+            {areaProgresso === 100 
+              ? '🎉 Parabéns! Você dominou esta área!' 
+              : `Continue estudando! Você está indo muito bem!`
+            }
+          </p>
+        </div>
+
+        {/* Tópicos organizados por dificuldade */}
+        <div className="topics-by-difficulty">
+          {Object.entries(topicsByDifficulty).map(([difficulty, topics]) => (
+            <div key={difficulty} className="difficulty-section">
+              <h4 className="difficulty-title">
+                <span className={`difficulty-badge ${difficulty.toLowerCase()}`}>
+                  {difficulty}
+                </span>
+                <span className="difficulty-count">
+                  {topics.filter(topic => {
+                    const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status;
+                    return status === 'dominado';
+                  }).length}/{topics.length} concluídos
+                </span>
+              </h4>
+              
+              <div className="topics-grid">
+                {topics.map((topic, idx) => {
+                  const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status || 'não iniciado';
+                  const statusObj = STATUS_OPTIONS.find(opt => opt.value === status);
+                  
+                  return (
+                    <div key={topic.name} className={`topic-card ${status}`}>
+                      <div className="topic-header">
+                        <div className="topic-status-icon">
+                          {statusObj?.icon}
+                        </div>
+                        <span className="topic-percentage">{topic.percentage}</span>
+                      </div>
+                      
+                      <div className="topic-content">
+                        <h5 className="topic-name">{topic.name}</h5>
+                      </div>
+                      
+                      <div className="topic-actions">
+                        {STATUS_OPTIONS.map(opt => (
+                          <button
+                            key={opt.value}
+                            onClick={() => updateStatus(areaObj.area, topic.name, opt.value)}
+                            disabled={loading}
+                            className={`action-btn ${status === opt.value ? 'active' : ''} ${opt.value}`}
+                            title={opt.label}
+                          >
+                            {opt.icon}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
-
-// Sugestão de CSS extra para animações e responsividade:
-// .mascote-bounce { animation: mascote-bounce 1.2s infinite alternate; }
-// @keyframes mascote-bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-12px); } }
-// .animate-fade-in-up { animation: fade-in-up 0.7s both; }
-// @keyframes fade-in-up { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
-// .board-responsive { max-width: 100vw; overflow-x: auto; }
-// @media (max-width: 600px) { .board-container { max-width: 98vw !important; } }
-// .btn-filtro-materia { font-size: 1rem; letter-spacing: 0.01em; background: linear-gradient(90deg,#23232b 60%,#3b82f6 120%); color: #fff; border: 2px solid #3b82f6; box-shadow: 0 2px 8px #23232b22; transition: all 0.2s; }
-// .btn-filtro-ativo { background: linear-gradient(90deg,#3b82f6 60%,#23232b 120%); color: #fff; border-color: #fff; }
-// .btn-filtro-inativo { background: #18181b; color: #60a5fa; border-color: #3b82f6; }
-// .btn-filtro-materia:hover { filter: brightness(1.1); transform: scale(1.05); }
-// .btn-status-jornada { font-size: 0.95rem; border-radius: 999px; background: #23232b; color: #60a5fa; border: 2px solid #3b82f6; margin-right: 2px; margin-bottom: 2px; transition: all 0.18s; }
-// .btn-status-ativo { background: #3b82f6; color: #fff; border-color: #fff; }
-// .btn-status-inativo { background: #18181b; color: #60a5fa; border-color: #3b82f6; }
-// .btn-status-jornada:hover { filter: brightness(1.1); transform: scale(1.07); }
