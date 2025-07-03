@@ -31,6 +31,11 @@ const Analytics = () => {
   const allFlashcards = dbFlashcards || [];
   const allErrors = dbErrors || [];
 
+  // Funções utilitárias para erros (MOVIDAS PARA CIMA)
+  const getErrorSubjectId = (e: any) => e.subjectId || e.subject_id;
+  const getErrorType = (e: any) => e.errorType || e.error_type;
+  const getReviewDates = (e: any) => e.reviewDates || e.review_dates || [];
+
   // DEBUG: Verificar se os dados estão vindo corretamente
   console.log('=== DEBUG ANALYTICS ===');
   console.log('User ID:', user?.id);
@@ -208,9 +213,6 @@ const Analytics = () => {
   }).filter(stat => stat.total > 0);
 
   // Estatísticas do Caderno de Erros
-  const getErrorSubjectId = (e: any) => e.subjectId || e.subject_id;
-  const getErrorType = (e: any) => e.errorType || e.error_type;
-  const getReviewDates = (e: any) => e.reviewDates || e.review_dates || [];
   const totalErrors = allErrors.length;
   const totalErrorReviews = allErrors.reduce((acc, e) => acc + (getReviewDates(e)?.length || 0), 0);
   const errorsByType = ['conceitual','distração','interpretação','outro'].map(type => ({
