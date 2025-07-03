@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
-import { Books, Plus, Edit, Trash2, Palette } from 'lucide-react';
-import type { Subject } from '../types';
-import SubjectForm from './SubjectForm';
-import { useSupabaseSubjects } from '../hooks/useSupabaseSubjects';
-
-interface SubjectManagerProps {
-  user: any;
-}
-import type { Subject } from '../types';
 import { Trash2, Edit, BookOpen, Plus, Palette, Star } from 'lucide-react';
-import { useState } from 'react';
+import type { Subject } from '../types';
 import SubjectForm from './SubjectForm';
 
 interface SubjectManagerProps {
