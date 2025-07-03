@@ -18,6 +18,7 @@ import { useSupabaseSubjects } from './hooks/useSupabaseSubjects'
 import { useSupabaseFlashcards } from './hooks/useSupabaseFlashcards'
 import { useSupabaseErrorNotebook } from './hooks/useSupabaseErrorNotebook'
 import type { Task, Subject } from './types'
+import JornadaEnem from './components/JornadaEnem'
 
 // Tipos de views possíveis no dashboard
 const NAV_ITEMS = [
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { id: 'flashcards', label: 'Flashcards', icon: BookOpen },
   { id: 'review', label: 'Revisão', icon: BarChart3 },
   { id: 'errors', label: 'Caderno de Erros', icon: Settings },
+  { id: 'jornada', label: 'Jornada ENEM', icon: BarChart3 },
 ]
 
 type View = typeof NAV_ITEMS[number]['id']
@@ -87,6 +89,8 @@ export default function App() {
         return <Review spacedFlashcards={flashcards} setFlashcards={addFlashcard} subjects={subjects} reviewSubject={reviewSubject} setReviewSubject={setReviewSubject} />
       case 'errors':
         return <ErrorNotebook errors={errors} addError={addError} updateError={updateError} deleteError={deleteError} subjects={subjects} />
+      case 'jornada':
+        return <JornadaEnem user={user} />
       default:
         return null
     }
