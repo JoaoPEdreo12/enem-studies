@@ -89,10 +89,35 @@ const STATUS_OPTIONS = [
   { value: 'dominado', label: 'Dominado', icon: <CheckCircle className="text-green-400 animate-bounce" size={18} /> },
 ];
 
-// Mascote pixel art educativo (livre para uso pessoal)
-const Mascote = () => (
-  <div className="mascote-bounce" style={{width:56, height:56, marginBottom:4, display:'flex', justifyContent:'center', alignItems:'center'}}>
-    <img src="https://pixeljoint.com/files/icons/full/avatar_mierdinsky.gif" alt="Mascote" style={{width:'100%',height:'100%',borderRadius:12,boxShadow:'0 4px 16px #23232b',background:'#fff',objectFit:'cover'}} />
+// Avatar/Mascote estudante
+const AvatarEstudante = ({ isActive = false }) => (
+  <div className={`avatar-estudante ${isActive ? 'avatar-active' : ''}`}>
+    <div className="avatar-container">
+      <div className="avatar-head">
+        <div className="avatar-face">
+          <div className="avatar-eyes">
+            <div className="eye left-eye"></div>
+            <div className="eye right-eye"></div>
+          </div>
+          <div className="avatar-mouth"></div>
+        </div>
+        <div className="avatar-cap">
+          <div className="cap-visor"></div>
+        </div>
+      </div>
+      <div className="avatar-body">
+        <div className="avatar-shirt"></div>
+        <div className="avatar-arms">
+          <div className="arm left-arm"></div>
+          <div className="arm right-arm"></div>
+        </div>
+      </div>
+      {isActive && (
+        <div className="progress-indicator">
+          <div className="progress-sparkles">✨</div>
+        </div>
+      )}
+    </div>
   </div>
 );
 
@@ -167,18 +192,16 @@ export default function JornadaEnem({ user }: { user: any }) {
         {/* Container do caminho em zigue-zague */}
         <div className="zigzag-path-container" style={{position:'relative', width:'100%', maxWidth:'800px', minHeight:'600px'}}>
           
-          {/* Mascote no primeiro tópico */}
-          {lastDominatedIdx >= 0 && (
-            <div style={{
-              position:'absolute',
-              top: `${Math.floor(lastDominatedIdx / 2) * 180 + 40}px`,
-              left: lastDominatedIdx % 2 === 0 ? '20%' : '70%',
-              transform: 'translate(-50%, -100%)',
-              zIndex: 10
-            }}>
-              <Mascote />
-            </div>
-          )}
+          {/* Avatar do estudante na posição atual */}
+          <div style={{
+            position:'absolute',
+            top: lastDominatedIdx >= 0 ? `${Math.floor(lastDominatedIdx / 2) * 180 + 40}px` : '40px',
+            left: lastDominatedIdx >= 0 ? (lastDominatedIdx % 2 === 0 ? '20%' : '70%') : '20%',
+            transform: 'translate(-50%, -100%)',
+            zIndex: 10
+          }}>
+            <AvatarEstudante isActive={true} />
+          </div>
           
           {areaObj.topics.map((topic, idx) => {
             const status = journey.find(j => j.area === areaObj.area && j.content === topic)?.status || 'não iniciado';
@@ -252,20 +275,22 @@ export default function JornadaEnem({ user }: { user: any }) {
                   <div className={`absolute ${isLeft ? 'left-full ml-4' : 'right-full mr-4'} top-1/2 transform -translate-y-1/2 bg-gray-800/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-600 min-w-[200px]`}>
                     <div className="font-medium text-white text-sm text-center mb-2">{topic}</div>
                     
-                    {/* Botões de status */}
-                    <div className="flex gap-1 flex-wrap justify-center">
+                    {/* Botões de status aprimorados */}
+                    <div className="flex gap-2 flex-wrap justify-center mt-3">
                       {STATUS_OPTIONS.map(opt => (
                         <button
                           key={opt.value}
                           onClick={() => updateStatus(areaObj.area, topic, opt.value)}
                           disabled={loading}
-                          className={`px-2 py-1 rounded-full text-xs font-semibold border transition-all flex items-center gap-1 ${
-                            status === opt.value 
-                              ? 'bg-blue-600 text-white border-blue-400' 
-                              : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
-                          }`}
+                          className={`status-btn ${
+                            status === opt.value ? 'status-btn-active' : 'status-btn-inactive'
+                          } ${opt.value === 'dominado' ? 'status-btn-success' : 
+                               opt.value === 'em progresso' ? 'status-btn-warning' : 
+                               'status-btn-default'}`}
+                          title={opt.label}
                         >
-                          <span className="text-xs">{opt.icon}</span>
+                          <span className="status-icon">{opt.icon}</span>
+                          <span className="status-label">{opt.label}</span>
                         </button>
                       ))}
                     </div>

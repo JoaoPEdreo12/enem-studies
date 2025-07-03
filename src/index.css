@@ -1156,6 +1156,286 @@ p, span, label {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
+/* Avatar Estudante */
+.avatar-estudante {
+  position: relative;
+  width: 64px;
+  height: 80px;
+  animation: avatar-float 2s ease-in-out infinite;
+}
+
+.avatar-estudante.avatar-active {
+  animation: avatar-celebrate 1.5s ease-in-out infinite;
+}
+
+.avatar-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-head {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: #FBBF85;
+  border-radius: 50%;
+  border: 2px solid #2563EB;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.avatar-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-eyes {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+}
+
+.eye {
+  width: 4px;
+  height: 4px;
+  background: #1F2937;
+  border-radius: 50%;
+  animation: eye-blink 3s ease-in-out infinite;
+}
+
+.avatar-mouth {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 3px;
+  border-radius: 0 0 6px 6px;
+  background: #DC2626;
+}
+
+.avatar-cap {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 20px;
+  background: linear-gradient(135deg, #3B82F6, #1E40AF);
+  border-radius: 18px 18px 0 0;
+  border: 2px solid #1E40AF;
+}
+
+.cap-visor {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 6px;
+  background: #1E40AF;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 2px 6px rgba(30, 64, 175, 0.4);
+}
+
+.avatar-body {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 40px;
+}
+
+.avatar-shirt {
+  width: 100%;
+  height: 32px;
+  background: linear-gradient(135deg, #10B981, #059669);
+  border-radius: 8px 8px 0 0;
+  border: 2px solid #059669;
+  position: relative;
+}
+
+.avatar-shirt::before {
+  content: '📚';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+}
+
+.avatar-arms {
+  position: absolute;
+  top: 4px;
+  width: 100%;
+  height: 20px;
+}
+
+.arm {
+  position: absolute;
+  width: 8px;
+  height: 16px;
+  background: #FBBF85;
+  border-radius: 4px;
+  border: 1px solid #F59E0B;
+}
+
+.left-arm {
+  left: -6px;
+  transform: rotate(-15deg);
+}
+
+.right-arm {
+  right: -6px;
+  transform: rotate(15deg);
+}
+
+.progress-indicator {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: sparkle-bounce 1s ease-in-out infinite;
+}
+
+.progress-sparkles {
+  font-size: 16px;
+  text-shadow: 0 0 8px #FFD700;
+}
+
+/* Animações do Avatar */
+@keyframes avatar-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes avatar-celebrate {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  25% { transform: translateY(-12px) scale(1.1); }
+  50% { transform: translateY(-6px) scale(1.05); }
+  75% { transform: translateY(-10px) scale(1.08); }
+}
+
+@keyframes eye-blink {
+  0%, 90%, 100% { height: 4px; }
+  95% { height: 1px; }
+}
+
+@keyframes sparkle-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0px) rotate(0deg); }
+  50% { transform: translateX(-50%) translateY(-8px) rotate(180deg); }
+}
+
+/* Botões de Status da Jornada ENEM */
+.status-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 2px solid;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  min-width: 120px;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.status-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.4s ease;
+}
+
+.status-btn:hover::before {
+  left: 100%;
+}
+
+.status-btn-default {
+  background: rgba(75, 85, 99, 0.8);
+  border-color: #6B7280;
+  color: #E5E7EB;
+}
+
+.status-btn-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: #F59E0B;
+  color: #FCD34D;
+}
+
+.status-btn-success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10B981;
+  color: #6EE7B7;
+}
+
+.status-btn-active {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  border-color: #93C5FD;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.status-btn-inactive:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.status-btn-default:hover {
+  background: rgba(107, 114, 128, 0.9);
+  border-color: #9CA3AF;
+}
+
+.status-btn-warning:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #FBBF24;
+}
+
+.status-btn-success:hover {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #34D399;
+}
+
+.status-btn:active {
+  transform: scale(0.95);
+}
+
+.status-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.status-label {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 /* Animação do mascote */
 .mascote-bounce { 
   animation: mascote-bounce 1.2s infinite alternate; 
