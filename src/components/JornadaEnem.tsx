@@ -160,15 +160,13 @@ export default function JornadaEnem({ user }: { user: any }) {
         </div>
       </div>
       {/* Seleção de área/matéria compacta */}
-      <div className="flex flex-wrap gap-2 mb-6 justify-center">
+      <div className="subject-filters">
         {ENEM_CONTENTS.map(area => (
           <button
             key={area.area}
             onClick={() => setSelectedArea(area.area)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-              selectedArea === area.area 
-                ? 'bg-blue-500 text-white border-2 border-blue-300' 
-                : 'bg-gray-700 text-gray-300 border-2 border-gray-600 hover:bg-gray-600'
+            className={`subject-filter-btn ${
+              selectedArea === area.area ? 'active' : 'inactive'
             }`}
           >
             {area.area}
@@ -176,19 +174,19 @@ export default function JornadaEnem({ user }: { user: any }) {
         ))}
       </div>
       {/* Tabuleiro gamificado em zigue-zague */}
-      <div className="relative flex flex-col items-center board-responsive" style={{minHeight:400, width:'100%', overflowX:'auto'}}>
-        <div className="font-bold text-white text-lg mb-4 animate-fade-in">{areaObj.area}</div>
+      <div className="jornada-enem-board">
+        <div className="font-bold text-white text-xl mb-4 text-center animate-fade-in">{areaObj.area}</div>
         
         {/* Container do caminho em zigue-zague */}
-        <div className="zigzag-path-container" style={{position:'relative', width:'100%', maxWidth:'800px', minHeight:'600px'}}>
+        <div className="zigzag-path-container" style={{position:'relative', width:'100%', maxWidth:'700px', minHeight:'450px', margin:'0 auto'}}>
           
           {/* Avatar do estudante na posição atual */}
           <div style={{
             position:'absolute',
-            top: `${Math.floor(avatarPosition / 2) * 180 + 40}px`,
-            left: avatarPosition % 2 === 0 ? '20%' : '70%',
+            top: `${Math.floor(avatarPosition / 2) * 140 + 30}px`,
+            left: avatarPosition % 2 === 0 ? '25%' : '75%',
             transform: 'translate(-50%, -100%)',
-            zIndex: 10
+            zIndex: 15
           }}>
             <AvatarEstudante isActive={true} />
           </div>
@@ -198,8 +196,8 @@ export default function JornadaEnem({ user }: { user: any }) {
             const statusObj = STATUS_OPTIONS.find(opt => opt.value === status);
             const isLeft = idx % 2 === 0;
             const row = Math.floor(idx / 2);
-            const yPosition = row * 180 + 80;
-            const xPosition = isLeft ? '20%' : '70%';
+            const yPosition = row * 140 + 60;
+            const xPosition = isLeft ? '25%' : '75%';
             
             return (
               <div key={topic}>
@@ -208,10 +206,10 @@ export default function JornadaEnem({ user }: { user: any }) {
                   <svg 
                     style={{
                       position: 'absolute',
-                      top: idx % 2 === 1 ? `${yPosition - 80}px` : `${yPosition - 160}px`,
+                      top: idx % 2 === 1 ? `${yPosition - 60}px` : `${yPosition - 120}px`,
                       left: 0,
                       width: '100%',
-                      height: idx % 2 === 1 ? '80px' : '160px',
+                      height: idx % 2 === 1 ? '60px' : '120px',
                       zIndex: 1,
                       pointerEvents: 'none'
                     }}
@@ -219,22 +217,24 @@ export default function JornadaEnem({ user }: { user: any }) {
                     {idx % 2 === 1 ? (
                       // Linha horizontal da esquerda para a direita
                       <path
-                        d={`M 20% 80 Q 50% 60 70% 80`}
-                        stroke="#4B5563"
-                        strokeWidth="3"
+                        d={`M 25% 60 Q 50% 45 75% 60`}
+                        stroke="#3B82F6"
+                        strokeWidth="2"
                         fill="none"
-                        strokeDasharray="8,4"
+                        strokeDasharray="6,3"
                         className="animate-pulse"
+                        opacity="0.6"
                       />
                     ) : (
                       // Linha diagonal para baixo
                       <path
-                        d={`M 70% 0 Q 70% 80 20% 160`}
-                        stroke="#4B5563"
-                        strokeWidth="3"
+                        d={`M 75% 0 Q 75% 60 25% 120`}
+                        stroke="#3B82F6"
+                        strokeWidth="2"
                         fill="none"
-                        strokeDasharray="8,4"
+                        strokeDasharray="6,3"
                         className="animate-pulse"
+                        opacity="0.6"
                       />
                     )}
                   </svg>
@@ -249,33 +249,41 @@ export default function JornadaEnem({ user }: { user: any }) {
                   zIndex: 5
                 }}>
                   {/* Círculo principal do tópico */}
-                  <div className={`w-24 h-24 rounded-full flex items-center justify-center shadow-xl border-4 transition-all duration-500 ${
+                  <div className={`topic-node ${
                     status === 'dominado' 
-                      ? 'bg-gradient-to-br from-green-400 to-green-600 border-green-300 scale-110 animate-bounce shadow-green-400/50' 
+                      ? 'status-dominado' 
                       : status === 'em progresso' 
-                        ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 border-yellow-300 scale-105 animate-pulse shadow-yellow-400/50' 
-                        : 'bg-gradient-to-br from-blue-800 to-blue-900 border-blue-600 shadow-blue-400/30'
+                        ? 'status-em-progresso' 
+                        : 'status-nao-iniciado'
                   }`}>
-                    <div className="text-2xl">
+                    <div className="text-lg">
                       {statusObj?.icon}
                     </div>
                   </div>
                   
-                  {/* Label do tópico simplificado */}
-                  <div className={`absolute ${isLeft ? 'left-full ml-4' : 'right-full mr-4'} top-1/2 transform -translate-y-1/2 bg-gray-800/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-600 min-w-[180px]`}>
-                    <div className="font-medium text-white text-sm text-center mb-2">{topic}</div>
+                  {/* Label do tópico compacto */}
+                  <div className={`topic-label ${isLeft ? 'left' : 'right'}`} style={{
+                    [isLeft ? 'left' : 'right']: '40px',
+                    top: '50%',
+                    transform: 'translateY(-50%)'
+                  }}>
+                    <div className="topic-title">{topic}</div>
                     
                     {/* Botões de status compactos */}
-                    <div className="flex gap-1 justify-center">
+                    <div className="status-controls">
                       {STATUS_OPTIONS.map(opt => (
                         <button
                           key={opt.value}
                           onClick={() => updateStatus(areaObj.area, topic, opt.value)}
                           disabled={loading}
-                          className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                          className={`status-btn ${
                             status === opt.value 
-                              ? 'bg-blue-500 border-blue-300 text-white scale-110' 
-                              : 'bg-gray-700 border-gray-500 text-gray-400 hover:bg-gray-600'
+                              ? 'status-btn-active' 
+                              : opt.value === 'não iniciado'
+                                ? 'status-btn-default'
+                                : opt.value === 'em progresso'
+                                  ? 'status-btn-warning'
+                                  : 'status-btn-success'
                           }`}
                           title={opt.label}
                         >
@@ -289,11 +297,12 @@ export default function JornadaEnem({ user }: { user: any }) {
             );
           })}
         </div>
-        {/* Progresso da área compacto */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-gray-800/50 rounded-full px-3 py-1.5 border border-gray-600">
-            <span className="text-blue-400 font-bold">{areaProgresso}%</span>
-            <span className="text-gray-300 text-sm">{areaObj.area}</span>
+        
+        {/* Progresso da área */}
+        <div className="area-progress">
+          <div className="progress-badge">
+            <span className="progress-percentage">{areaProgresso}%</span>
+            <span>{areaObj.area}</span>
           </div>
         </div>
       </div>
