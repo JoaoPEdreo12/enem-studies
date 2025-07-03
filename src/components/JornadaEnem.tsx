@@ -8,77 +8,79 @@ const ENEM_CONTENTS = [
   {
     area: 'Matemática',
     topics: [
-      'Funções do 1º grau',
-      'Funções do 2º grau',
-      'Probabilidade',
-      'Geometria Espacial',
-      'Porcentagem',
-      'Progressões (PA e PG)',
-      'Trigonometria',
-      'Estatística',
-      'Análise Combinatória',
-      'Geometria Plana',
-      'Equações e Inequações',
-      'Logaritmos',
-      'Matrizes e Determinantes',
-      'Gráficos e Tabelas',
+      { name: 'Funções do 1º grau', percentage: '7%' },
+      { name: 'Funções do 2º grau', percentage: '6%' },
+      { name: 'Probabilidade', percentage: '8%' },
+      { name: 'Geometria Espacial', percentage: '9%' },
+      { name: 'Porcentagem', percentage: '10%' },
+      { name: 'Progressões (PA e PG)', percentage: '5%' },
+      { name: 'Trigonometria', percentage: '6%' },
+      { name: 'Estatística', percentage: '7%' },
+      { name: 'Análise Combinatória', percentage: '4%' },
+      { name: 'Geometria Plana', percentage: '8%' },
+      { name: 'Equações e Inequações', percentage: '7%' },
+      { name: 'Logaritmos', percentage: '3%' },
+      { name: 'Matrizes e Determinantes', percentage: '2%' },
+      { name: 'Gráficos e Tabelas', percentage: '10%' },
+      { name: 'Razão e Proporção', percentage: '6%' },
     ]
   },
   {
     area: 'Linguagens',
     topics: [
-      'Interpretação de Texto',
-      'Figuras de Linguagem',
-      'Gêneros Textuais',
-      'Gramática (Morfologia e Sintaxe)',
-      'Funções da Linguagem',
-      'Variação Linguística',
-      'Literatura Brasileira',
-      'Arte e Cultura',
-      'Educação Física',
-      'Tecnologias da Informação',
+      { name: 'Interpretação de Texto', percentage: '25%' },
+      { name: 'Figuras de Linguagem', percentage: '8%' },
+      { name: 'Gêneros Textuais', percentage: '12%' },
+      { name: 'Gramática (Morfologia e Sintaxe)', percentage: '10%' },
+      { name: 'Funções da Linguagem', percentage: '5%' },
+      { name: 'Variação Linguística', percentage: '7%' },
+      { name: 'Literatura Brasileira', percentage: '15%' },
+      { name: 'Arte e Cultura', percentage: '3%' },
+      { name: 'Educação Física', percentage: '2%' },
+      { name: 'Tecnologias da Informação', percentage: '3%' },
+      { name: 'Coesão e Coerência', percentage: '10%' },
     ]
   },
   {
     area: 'Ciências Humanas',
     topics: [
-      'História do Brasil',
-      'História Geral',
-      'Geografia do Brasil',
-      'Geopolítica',
-      'Atualidades',
-      'Filosofia',
-      'Sociologia',
-      'Cidadania e Direitos Humanos',
-      'Economia',
-      'Demografia',
+      { name: 'História do Brasil', percentage: '20%' },
+      { name: 'História Geral', percentage: '15%' },
+      { name: 'Geografia do Brasil', percentage: '18%' },
+      { name: 'Geopolítica', percentage: '10%' },
+      { name: 'Atualidades', percentage: '12%' },
+      { name: 'Filosofia', percentage: '8%' },
+      { name: 'Sociologia', percentage: '7%' },
+      { name: 'Cidadania e Direitos Humanos', percentage: '5%' },
+      { name: 'Economia', percentage: '3%' },
+      { name: 'Demografia', percentage: '2%' },
     ]
   },
   {
     area: 'Ciências da Natureza',
     topics: [
-      'Química Geral',
-      'Físico-Química',
-      'Química Orgânica',
-      'Biologia Celular',
-      'Genética',
-      'Ecologia',
-      'Física Mecânica',
-      'Física Óptica',
-      'Física Elétrica',
-      'Astronomia',
-      'Saúde e Meio Ambiente',
+      { name: 'Química Geral', percentage: '15%' },
+      { name: 'Físico-Química', percentage: '18%' },
+      { name: 'Química Orgânica', percentage: '12%' },
+      { name: 'Biologia Celular', percentage: '10%' },
+      { name: 'Genética', percentage: '13%' },
+      { name: 'Ecologia', percentage: '17%' },
+      { name: 'Física Mecânica', percentage: '10%' },
+      { name: 'Física Óptica', percentage: '5%' },
+      { name: 'Física Elétrica', percentage: '8%' },
+      { name: 'Astronomia', percentage: '2%' },
+      { name: 'Saúde e Meio Ambiente', percentage: '10%' },
     ]
   },
   {
     area: 'Redação',
     topics: [
-      'Estrutura do Texto Dissertativo',
-      'Competências do ENEM',
-      'Proposta de Intervenção',
-      'Coesão e Coerência',
-      'Argumentação',
-      'Repertório Sociocultural',
+      { name: 'Estrutura do Texto Dissertativo', percentage: '20%' },
+      { name: 'Competências do ENEM', percentage: '20%' },
+      { name: 'Proposta de Intervenção', percentage: '20%' },
+      { name: 'Coesão e Coerência', percentage: '15%' },
+      { name: 'Argumentação', percentage: '15%' },
+      { name: 'Repertório Sociocultural', percentage: '10%' },
     ]
   }
 ];
@@ -138,10 +140,10 @@ export default function JornadaEnem({ user }: { user: any }) {
 
   // Encontra o índice do tópico atual (primeiro não dominado ou em progresso)
   const currentTopicIdx = areaObj.topics.findIndex(topic => {
-    const status = journey.find(j => j.area === areaObj.area && j.content === topic)?.status;
+    const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status;
     return status === 'não iniciado' || status === 'em progresso';
   });
-  
+
   // Se todos estão dominados, coloca no último
   const avatarPosition = currentTopicIdx === -1 ? areaObj.topics.length - 1 : currentTopicIdx;
 
@@ -176,10 +178,10 @@ export default function JornadaEnem({ user }: { user: any }) {
       {/* Tabuleiro gamificado em zigue-zague */}
       <div className="jornada-enem-board">
         <div className="font-bold text-white text-xl mb-4 text-center animate-fade-in">{areaObj.area}</div>
-        
+
         {/* Container do caminho em zigue-zague */}
         <div className="zigzag-path-container" style={{position:'relative', width:'100%', maxWidth:'700px', minHeight:'450px', margin:'0 auto'}}>
-          
+
           {/* Avatar do estudante na posição atual */}
           <div style={{
             position:'absolute',
@@ -190,17 +192,17 @@ export default function JornadaEnem({ user }: { user: any }) {
           }}>
             <AvatarEstudante isActive={true} />
           </div>
-          
+
           {areaObj.topics.map((topic, idx) => {
-            const status = journey.find(j => j.area === areaObj.area && j.content === topic)?.status || 'não iniciado';
+            const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status || 'não iniciado';
             const statusObj = STATUS_OPTIONS.find(opt => opt.value === status);
             const isLeft = idx % 2 === 0;
             const row = Math.floor(idx / 2);
             const yPosition = row * 140 + 60;
             const xPosition = isLeft ? '25%' : '75%';
-            
+
             return (
-              <div key={topic}>
+              <div key={topic.name}>
                 {/* Linha de conexão em zigue-zague */}
                 {idx > 0 && (
                   <svg 
@@ -239,7 +241,7 @@ export default function JornadaEnem({ user }: { user: any }) {
                     )}
                   </svg>
                 )}
-                
+
                 {/* Nó do tópico */}
                 <div style={{
                   position: 'absolute',
@@ -260,21 +262,21 @@ export default function JornadaEnem({ user }: { user: any }) {
                       {statusObj?.icon}
                     </div>
                   </div>
-                  
+
                   {/* Label do tópico compacto */}
                   <div className={`topic-label ${isLeft ? 'left' : 'right'}`} style={{
                     [isLeft ? 'left' : 'right']: '40px',
                     top: '50%',
                     transform: 'translateY(-50%)'
                   }}>
-                    <div className="topic-title">{topic}</div>
-                    
+                    <div className="topic-title">{topic.name} ({topic.percentage})</div>
+
                     {/* Botões de status compactos */}
                     <div className="status-controls">
                       {STATUS_OPTIONS.map(opt => (
                         <button
                           key={opt.value}
-                          onClick={() => updateStatus(areaObj.area, topic, opt.value)}
+                          onClick={() => updateStatus(areaObj.area, topic.name, opt.value)}
                           disabled={loading}
                           className={`status-btn ${
                             status === opt.value 
@@ -297,7 +299,7 @@ export default function JornadaEnem({ user }: { user: any }) {
             );
           })}
         </div>
-        
+
         {/* Progresso da área */}
         <div className="area-progress">
           <div className="progress-badge">
@@ -324,4 +326,4 @@ export default function JornadaEnem({ user }: { user: any }) {
 // .btn-status-jornada { font-size: 0.95rem; border-radius: 999px; background: #23232b; color: #60a5fa; border: 2px solid #3b82f6; margin-right: 2px; margin-bottom: 2px; transition: all 0.18s; }
 // .btn-status-ativo { background: #3b82f6; color: #fff; border-color: #fff; }
 // .btn-status-inativo { background: #18181b; color: #60a5fa; border-color: #3b82f6; }
-// .btn-status-jornada:hover { filter: brightness(1.1); transform: scale(1.07); } 
+// .btn-status-jornada:hover { filter: brightness(1.1); transform: scale(1.07); }
