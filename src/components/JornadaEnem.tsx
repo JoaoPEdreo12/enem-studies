@@ -136,11 +136,14 @@ export default function JornadaEnem({ user }: { user: any }) {
   const areaDominados = journey.filter(j => j.status === 'dominado' && j.area === selectedArea).length;
   const areaProgresso = Math.round((areaDominados / areaTotal) * 100);
 
-  // Encontra o índice do último tópico dominado para posicionar o mascote
-  const lastDominatedIdx = areaObj.topics.reduce((acc, topic, idx) => {
+  // Encontra o índice do tópico atual (primeiro não dominado ou em progresso)
+  const currentTopicIdx = areaObj.topics.findIndex(topic => {
     const status = journey.find(j => j.area === areaObj.area && j.content === topic)?.status;
-    return status === 'dominado' ? idx : acc;
-  }, -1);
+    return status === 'não iniciado' || status === 'em progresso';
+  });
+  
+  // Se todos estão dominados, coloca no último
+  const avatarPosition = currentTopicIdx === -1 ? areaObj.topics.length - 1 : currentTopicIdx;
 
   return (
     <div className="space-y-8 fade-in-up">
@@ -149,38 +152,25 @@ export default function JornadaEnem({ user }: { user: any }) {
         <Smile className="text-blue-400 animate-bounce" size={28} />
       </h2>
       <p className="text-gray-400 mb-6">Escolha a matéria e avance no seu tabuleiro de estudos! Marque seu progresso e veja sua evolução de forma gamificada.</p>
-      {/* Progresso geral */}
-      <div className="mb-8 flex items-center gap-4">
-        <div className="w-32 h-32 flex items-center justify-center relative">
-          <svg width="100" height="100">
-            <circle cx="50" cy="50" r="45" stroke="#23232b" strokeWidth="10" fill="none" />
-            <circle
-              cx="50" cy="50" r="45"
-              stroke="#3b82f6"
-              strokeWidth="10"
-              fill="none"
-              strokeDasharray={2 * Math.PI * 45}
-              strokeDashoffset={2 * Math.PI * 45 * (1 - progresso / 100)}
-              style={{ transition: 'stroke-dashoffset 0.6s' }}
-            />
-          </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-blue-400 animate-pulse">{progresso}%</span>
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-lg text-white font-semibold">Progresso Geral</span>
-          <span className="text-gray-400">{dominados} de {total} tópicos dominados</span>
+      {/* Progresso geral compacto */}
+      <div className="mb-6 text-center">
+        <div className="inline-flex items-center gap-3 bg-gray-800/50 rounded-full px-4 py-2 border border-gray-600">
+          <span className="text-blue-400 font-bold text-lg">{progresso}%</span>
+          <span className="text-gray-300 text-sm">{dominados}/{total} concluídos</span>
         </div>
       </div>
-      {/* Seleção de área/matéria - botões organizados em linha centralizada */}
-      <div className="flex flex-wrap gap-2 mb-8 justify-center items-center" style={{rowGap:12}}>
+      {/* Seleção de área/matéria compacta */}
+      <div className="flex flex-wrap gap-2 mb-6 justify-center">
         {ENEM_CONTENTS.map(area => (
           <button
             key={area.area}
             onClick={() => setSelectedArea(area.area)}
-            className={`btn-filtro-materia px-4 py-2 rounded-full font-semibold border transition-all flex items-center gap-2 ${selectedArea === area.area ? 'btn-filtro-ativo' : 'btn-filtro-inativo'}`}
-            style={{boxShadow: selectedArea === area.area ? '0 2px 12px #3b82f6aa' : 'none', minWidth:120, justifyContent:'center'}}
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+              selectedArea === area.area 
+                ? 'bg-blue-500 text-white border-2 border-blue-300' 
+                : 'bg-gray-700 text-gray-300 border-2 border-gray-600 hover:bg-gray-600'
+            }`}
           >
-            <ChevronRight size={16} className={selectedArea === area.area ? 'animate-bounce' : ''} />
             {area.area}
           </button>
         ))}
@@ -195,8 +185,8 @@ export default function JornadaEnem({ user }: { user: any }) {
           {/* Avatar do estudante na posição atual */}
           <div style={{
             position:'absolute',
-            top: lastDominatedIdx >= 0 ? `${Math.floor(lastDominatedIdx / 2) * 180 + 40}px` : '40px',
-            left: lastDominatedIdx >= 0 ? (lastDominatedIdx % 2 === 0 ? '20%' : '70%') : '20%',
+            top: `${Math.floor(avatarPosition / 2) * 180 + 40}px`,
+            left: avatarPosition % 2 === 0 ? '20%' : '70%',
             transform: 'translate(-50%, -100%)',
             zIndex: 10
           }}>
@@ -271,66 +261,40 @@ export default function JornadaEnem({ user }: { user: any }) {
                     </div>
                   </div>
                   
-                  {/* Label do tópico */}
-                  <div className={`absolute ${isLeft ? 'left-full ml-4' : 'right-full mr-4'} top-1/2 transform -translate-y-1/2 bg-gray-800/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-600 min-w-[200px]`}>
+                  {/* Label do tópico simplificado */}
+                  <div className={`absolute ${isLeft ? 'left-full ml-4' : 'right-full mr-4'} top-1/2 transform -translate-y-1/2 bg-gray-800/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-600 min-w-[180px]`}>
                     <div className="font-medium text-white text-sm text-center mb-2">{topic}</div>
                     
-                    {/* Botões de status aprimorados */}
-                    <div className="flex gap-2 flex-wrap justify-center mt-3">
+                    {/* Botões de status compactos */}
+                    <div className="flex gap-1 justify-center">
                       {STATUS_OPTIONS.map(opt => (
                         <button
                           key={opt.value}
                           onClick={() => updateStatus(areaObj.area, topic, opt.value)}
                           disabled={loading}
-                          className={`status-btn ${
-                            status === opt.value ? 'status-btn-active' : 'status-btn-inactive'
-                          } ${opt.value === 'dominado' ? 'status-btn-success' : 
-                               opt.value === 'em progresso' ? 'status-btn-warning' : 
-                               'status-btn-default'}`}
+                          className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                            status === opt.value 
+                              ? 'bg-blue-500 border-blue-300 text-white scale-110' 
+                              : 'bg-gray-700 border-gray-500 text-gray-400 hover:bg-gray-600'
+                          }`}
                           title={opt.label}
                         >
-                          <span className="status-icon">{opt.icon}</span>
-                          <span className="status-label">{opt.label}</span>
+                          {opt.icon}
                         </button>
                       ))}
                     </div>
-                    
-                    {/* Status atual */}
-                    <div className="text-xs text-gray-400 mt-2 text-center">
-                      Status: <span className="font-semibold text-blue-300">{statusObj?.label}</span>
-                    </div>
-                    
-                    {/* Mensagem de conquista */}
-                    {status === 'dominado' && (
-                      <div className="text-green-400 text-xs mt-2 text-center animate-bounce">
-                        Parabéns! <Smile className="inline ml-1" size={12} />
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
             );
           })}
         </div>
-        {/* Progresso da área */}
-        <div className="mt-8 flex flex-col items-center">
-          <div className="w-24 h-24 flex items-center justify-center relative">
-            <svg width="90" height="90">
-              <circle cx="45" cy="45" r="40" stroke="#23232b" strokeWidth="8" fill="none" />
-              <circle
-                cx="45" cy="45" r="40"
-                stroke="#3b82f6"
-                strokeWidth="8"
-                fill="none"
-                strokeDasharray={2 * Math.PI * 40}
-                strokeDashoffset={2 * Math.PI * 40 * (1 - areaProgresso / 100)}
-                style={{ transition: 'stroke-dashoffset 0.6s' }}
-              />
-            </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-blue-400 animate-pulse">{areaProgresso}%</span>
+        {/* Progresso da área compacto */}
+        <div className="mt-6 text-center">
+          <div className="inline-flex items-center gap-2 bg-gray-800/50 rounded-full px-3 py-1.5 border border-gray-600">
+            <span className="text-blue-400 font-bold">{areaProgresso}%</span>
+            <span className="text-gray-300 text-sm">{areaObj.area}</span>
           </div>
-          <span className="text-lg text-white font-semibold mt-2">Progresso em {areaObj.area}</span>
-          <span className="text-gray-400">{areaDominados} de {areaTotal} tópicos dominados</span>
         </div>
       </div>
     </div>
