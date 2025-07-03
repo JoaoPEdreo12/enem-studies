@@ -13,7 +13,7 @@ export default function Register() {
   const [birthDate, setBirthDate] = useState('')
   const [examYear, setExamYear] = useState('')
   const [targetExam, setTargetExam] = useState('')
-  const [hasPreparatoryEourse, setHasPreparatoryEourse] = useState('')
+  const [hasPreparatoryCourse, setHasPreparatoryCourse] = useState('')
   const [preparatoryCourse, setPreparatoryCourse] = useState('')
   const [currentGrade, setCurrentGrade] = useState('')
   const [studyGoal, setStudyGoal] = useState('')
@@ -49,16 +49,7 @@ export default function Register() {
       password,
       options: {
         data: {
-          full_name: fullName,
-          phone: phone,
-          birth_date: birthDate,
-          exam_year: examYear,
-          target_exam: targetExam,
-          has_preparatory_course: hasPreparatoryEourse === 'sim',
-          preparatory_course: preparatoryCourse,
-          current_grade: currentGrade,
-          study_goal: studyGoal,
-          previous_experience: previousExperience
+          full_name: fullName
         }
       }
     })
@@ -72,10 +63,12 @@ export default function Register() {
           .from('user_profiles')
           .insert({
             user_id: authData.user.id,
+            full_name: fullName,
+            phone: phone,
             birth_date: birthDate,
             exam_year: parseInt(examYear),
             target_exam: targetExam,
-            has_preparatory_course: hasPreparatoryEourse === 'sim',
+            has_preparatory_course: hasPreparatoryCourse === 'sim',
             preparatory_course: preparatoryCourse || null,
             current_grade: currentGrade,
             study_goal: studyGoal,
@@ -84,6 +77,7 @@ export default function Register() {
 
         if (profileError) {
           console.error('Erro ao salvar perfil:', profileError)
+          setError('Erro ao salvar perfil do usuário')
         }
       }
 
@@ -337,32 +331,32 @@ export default function Register() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="hasPreparatoryEourse" className="form-label">Faz Cursinho?</label>
+                <label htmlFor="hasPreparatoryCourse" className="form-label">Faz Cursinho?</label>
                 <div className="radio-group">
                   <label className="radio-option">
                     <input
                       type="radio"
-                      name="hasPreparatoryEourse"
+                      name="hasPreparatoryCourse"
                       value="sim"
-                      checked={hasPreparatoryEourse === 'sim'}
-                      onChange={e => setHasPreparatoryEourse(e.target.value)}
+                      checked={hasPreparatoryCourse === 'sim'}
+                      onChange={e => setHasPreparatoryCourse(e.target.value)}
                     />
                     <span>Sim</span>
                   </label>
                   <label className="radio-option">
                     <input
                       type="radio"
-                      name="hasPreparatoryEourse"
+                      name="hasPreparatoryCourse"
                       value="não"
-                      checked={hasPreparatoryEourse === 'não'}
-                      onChange={e => setHasPreparatoryEourse(e.target.value)}
+                      checked={hasPreparatoryCourse === 'não'}
+                      onChange={e => setHasPreparatoryCourse(e.target.value)}
                     />
                     <span>Não</span>
                   </label>
                 </div>
               </div>
 
-              {hasPreparatoryEourse === 'sim' && (
+              {hasPreparatoryCourse === 'sim' && (
                 <div className="form-group">
                   <label htmlFor="preparatoryCourse" className="form-label">Qual Cursinho?</label>
                   <div className="input-wrapper">

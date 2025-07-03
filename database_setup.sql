@@ -1,11 +1,16 @@
-
 -- Script para configurar o banco de dados do ENEM Studies no Supabase
 -- Execute este script no SQL Editor do Supabase
 
--- 1. Criar tabela de perfis de usuário (estende o auth.users do Supabase)
+-- Adicionar colunas na tabela auth.users (metadados do usuário)
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE auth.users ADD COLUMN IF NOT EXISTS phone TEXT;
+
+-- Criar tabela para perfis de usuário estendidos
 CREATE TABLE IF NOT EXISTS user_profiles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name TEXT,
+  phone TEXT,
   birth_date DATE,
   exam_year INTEGER,
   target_exam TEXT,
@@ -14,9 +19,8 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   current_grade TEXT,
   study_goal TEXT,
   previous_experience TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-  UNIQUE(user_id)
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 2. Criar tabela de matérias
@@ -228,7 +232,7 @@ BEGIN
     'total_errors', (SELECT COUNT(*) FROM error_notebook WHERE user_id = user_uuid),
     'enem_progress', (SELECT COUNT(*) FROM enem_journey WHERE user_id = user_uuid AND status = 'dominado')
   ) INTO stats;
-  
+
   RETURN stats;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
