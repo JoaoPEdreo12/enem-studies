@@ -1,5 +1,5 @@
 import type { Subject } from '../types';
-import { Trash2, BookOpen, Plus, Palette, Star } from 'lucide-react';
+import { Trash2, Edit, BookOpen, Plus, Palette, Star } from 'lucide-react';
 import { useState } from 'react';
 import SubjectForm from './SubjectForm';
 
@@ -10,7 +10,7 @@ interface SubjectManagerProps {
   addSubject: (data: any) => void;
 }
 
-const SubjectManager = ({ subjects, onDelete, addSubject }: SubjectManagerProps) => {
+const SubjectManager = ({ subjects, onEdit, onDelete, addSubject }: SubjectManagerProps) => {
   const [showForm, setShowForm] = useState(false)
   
   const handleCreate = (data: any) => {
@@ -114,10 +114,16 @@ const SubjectManager = ({ subjects, onDelete, addSubject }: SubjectManagerProps)
               className="group card hover-lift transition-all duration-500"
               style={{ 
                 animationDelay: `${index * 0.1}s`,
-                background: 'rgba(26, 26, 58, 0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(59, 130, 246, 0.2)',
-                borderRadius: '20px'
+                background: 'rgba(26, 26, 58, 0.92)',
+                border: '1.5px solid rgba(59, 130, 246, 0.18)',
+                borderRadius: '20px',
+                boxShadow: `0 4px 32px 0 ${subject.color}22`,
+                padding: '2.2rem 1.7rem 1.5rem 1.7rem',
+                minHeight: 280,
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
               }}
             >
               <div className="flex items-start justify-between mb-4">
@@ -131,19 +137,29 @@ const SubjectManager = ({ subjects, onDelete, addSubject }: SubjectManagerProps)
                   >
                     {subject.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-white text-lg mb-1">{subject.name}</h3>
-                    <p className="text-gray-400 text-sm">{subject.category}</p>
+                  <div className="flex-1 flex items-center gap-2">
+                    <h3 className="font-bold text-white text-lg mb-1 flex items-center gap-2">
+                      <span className="w-7 h-7 rounded-full border-2 border-white/30 shadow-md" style={{ backgroundColor: subject.color, display: 'inline-block' }} />
+                      {subject.name}
+                    </h3>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-2 ml-2">
+                  <button
+                    onClick={() => onEdit(subject)}
+                    className="btn btn-gradient-primary hover-lift flex items-center justify-center p-2 rounded-full"
+                    title="Editar matéria"
+                    style={{minWidth:36, minHeight:36, width:36, height:36, padding:0}}
+                  >
+                    <Edit size={18} />
+                  </button>
                   <button
                     onClick={() => onDelete(subject.id)}
-                    className="p-2 hover:bg-red-500/20 rounded-lg transition-colors group/btn"
+                    className="btn btn-gradient-primary hover-lift flex items-center justify-center p-2 rounded-full"
                     title="Excluir matéria"
+                    style={{minWidth:36, minHeight:36, width:36, height:36, padding:0, background:'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'}}
                   >
-                    <Trash2 size={16} className="text-red-400 group-hover/btn:text-red-300" />
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>
@@ -166,18 +182,8 @@ const SubjectManager = ({ subjects, onDelete, addSubject }: SubjectManagerProps)
                 </div>
                 
                 <div className="flex items-center gap-3 pt-2">
-                  <div 
-                    className="w-5 h-5 rounded-lg shadow-md" 
-                    style={{ backgroundColor: subject.color }}
-                  />
+                  <span className="inline-block w-6 h-6 rounded-full border-2 border-white/20 shadow-md mr-2" style={{ backgroundColor: subject.color, verticalAlign: 'middle' }} />
                   <span className="text-gray-400 text-sm">Cor da matéria</span>
-                  <div className="ml-auto">
-                    <span 
-                      className="text-xs font-mono px-2 py-1 rounded bg-black/30 text-gray-300"
-                    >
-                      {subject.color.toUpperCase()}
-                    </span>
-                  </div>
                 </div>
               </div>
 
@@ -185,12 +191,6 @@ const SubjectManager = ({ subjects, onDelete, addSubject }: SubjectManagerProps)
                 <div className="text-xs text-gray-500">
                   Criada em {new Date().toLocaleDateString('pt-BR')}
                 </div>
-                <button
-                  className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
-                  onClick={() => console.log('Edit subject:', subject.id)}
-                >
-                  Editar
-                </button>
               </div>
             </div>
           ))}
