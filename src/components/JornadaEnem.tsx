@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CheckCircle, Clock, Play, Sparkles, Smile, Trophy, Target, BookOpen } from 'lucide-react';
 import { useSupabaseEnemJourney } from '../hooks/useSupabaseEnemJourney';
@@ -16,7 +15,7 @@ const ENEM_CONTENTS = [
       { name: 'Porcentagem', percentage: '12%', difficulty: 'Básico' },
       { name: 'Razão e Proporção', percentage: '8%', difficulty: 'Básico' },
       { name: 'Regra de Três', percentage: '6%', difficulty: 'Básico' },
-      
+
       // Intermediário
       { name: 'Funções do 1º grau', percentage: '9%', difficulty: 'Intermediário' },
       { name: 'Funções do 2º grau', percentage: '8%', difficulty: 'Intermediário' },
@@ -24,7 +23,7 @@ const ENEM_CONTENTS = [
       { name: 'Progressões (PA e PG)', percentage: '6%', difficulty: 'Intermediário' },
       { name: 'Geometria Plana', percentage: '10%', difficulty: 'Intermediário' },
       { name: 'Estatística Básica', percentage: '9%', difficulty: 'Intermediário' },
-      
+
       // Avançado
       { name: 'Geometria Espacial', percentage: '11%', difficulty: 'Avançado' },
       { name: 'Trigonometria', percentage: '8%', difficulty: 'Avançado' },
@@ -45,13 +44,13 @@ const ENEM_CONTENTS = [
       { name: 'Gramática Básica', percentage: '8%', difficulty: 'Básico' },
       { name: 'Figuras de Linguagem', percentage: '6%', difficulty: 'Básico' },
       { name: 'Tipologia Textual', percentage: '7%', difficulty: 'Básico' },
-      
+
       // Intermediário
       { name: 'Literatura Brasileira', percentage: '12%', difficulty: 'Intermediário' },
       { name: 'Redação ENEM', percentage: '20%', difficulty: 'Intermediário' },
       { name: 'Semântica e Pragmática', percentage: '5%', difficulty: 'Intermediário' },
       { name: 'Variação Linguística', percentage: '6%', difficulty: 'Intermediário' },
-      
+
       // Avançado
       { name: 'Literatura Portuguesa', percentage: '8%', difficulty: 'Avançado' },
       { name: 'Análise do Discurso', percentage: '4%', difficulty: 'Avançado' },
@@ -70,13 +69,13 @@ const ENEM_CONTENTS = [
       { name: 'Ditadura Militar', percentage: '7%', difficulty: 'Intermediário' },
       { name: 'República Velha', percentage: '6%', difficulty: 'Intermediário' },
       { name: 'Escravidão no Brasil', percentage: '8%', difficulty: 'Básico' },
-      
+
       // Geografia
       { name: 'Geografia Urbana', percentage: '10%', difficulty: 'Intermediário' },
       { name: 'Meio Ambiente', percentage: '12%', difficulty: 'Básico' },
       { name: 'Demografia', percentage: '7%', difficulty: 'Básico' },
       { name: 'Globalização', percentage: '9%', difficulty: 'Intermediário' },
-      
+
       // Filosofia e Sociologia
       { name: 'Sociologia Brasileira', percentage: '6%', difficulty: 'Avançado' },
       { name: 'Filosofia Moderna', percentage: '5%', difficulty: 'Avançado' },
@@ -95,13 +94,13 @@ const ENEM_CONTENTS = [
       { name: 'Termodinâmica', percentage: '8%', difficulty: 'Intermediário' },
       { name: 'Eletricidade', percentage: '10%', difficulty: 'Avançado' },
       { name: 'Ondulatória', percentage: '7%', difficulty: 'Avançado' },
-      
+
       // Química
       { name: 'Química Orgânica', percentage: '15%', difficulty: 'Avançado' },
       { name: 'Físico-Química', percentage: '10%', difficulty: 'Intermediário' },
       { name: 'Química Geral', percentage: '8%', difficulty: 'Básico' },
       { name: 'Estequiometria', percentage: '7%', difficulty: 'Intermediário' },
-      
+
       // Biologia
       { name: 'Ecologia', percentage: '12%', difficulty: 'Básico' },
       { name: 'Genética', percentage: '9%', difficulty: 'Intermediário' },
@@ -119,19 +118,10 @@ const STATUS_OPTIONS = [
 ];
 
 // Avatar/Mascote estudante melhorado
-const AvatarEstudante = ({ topicIndex, totalTopics }) => {
-  const progressPercentage = totalTopics > 0 ? (topicIndex / totalTopics) * 100 : 0;
-  
+const AvatarEstudante = () => {
   return (
     <div 
       className="avatar-estudante-container"
-      style={{
-        position: 'absolute',
-        left: `${progressPercentage}%`,
-        top: '-60px',
-        transform: 'translateX(-50%)',
-        zIndex: 10
-      }}
     >
       <div className="avatar-estudante">
         <div className="avatar-head">
@@ -275,7 +265,7 @@ export default function JornadaEnem({ user }: { user: any }) {
             </div>
           </div>
 
-          {/* Trilha do Tabuleiro com Avatar */}
+          {/* Trilha do Tabuleiro */}
           <div className="board-trail">
             <div className="trail-header">
               <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -283,8 +273,8 @@ export default function JornadaEnem({ user }: { user: any }) {
                 Trilha de Aprendizado
               </h4>
             </div>
-            
-            {/* Linha de progresso com avatar posicionado */}
+
+            {/* Linha de progresso */}
             <div className="progress-track-container">
               <div className="progress-track">
                 <div 
@@ -294,10 +284,6 @@ export default function JornadaEnem({ user }: { user: any }) {
                     backgroundColor: areaObj.color
                   }}
                 ></div>
-                <AvatarEstudante 
-                  topicIndex={avatarTopicIndex} 
-                  totalTopics={areaObj.topics.length - 1}
-                />
               </div>
             </div>
 
@@ -309,11 +295,11 @@ export default function JornadaEnem({ user }: { user: any }) {
                     {difficulty}
                   </h5>
                   <div className="topics-grid">
-                    {topics.map((topic) => {
+                    {topics.map((topic, index) => {
                       const status = journey.find(j => 
                         j.area === selectedArea && j.content === topic.name
                       )?.status || 'a fazer';
-                      
+
                       const statusOption = STATUS_OPTIONS.find(opt => opt.value === status);
                       const isCurrentTopic = areaObj.topics.findIndex(t => t.name === topic.name) === avatarTopicIndex;
 
@@ -321,7 +307,6 @@ export default function JornadaEnem({ user }: { user: any }) {
                         <div 
                           key={topic.name} 
                           className={`topic-card status-${status.replace(' ', '-')} ${isCurrentTopic ? 'current-topic' : ''}`}
-                          onClick={() => handleStatusChange(selectedArea, topic.name, status)}
                         >
                           <div className="topic-header">
                             <span className="topic-percentage" style={{color: areaObj.color}}>
@@ -342,9 +327,25 @@ export default function JornadaEnem({ user }: { user: any }) {
                           </div>
                           {isCurrentTopic && (
                             <div className="current-indicator">
-                              <Sparkles className="text-yellow-400" size={16} />
+                              <AvatarEstudante />
                             </div>
                           )}
+                          <div className="status-buttons">
+                            {STATUS_OPTIONS.map(option => (
+                                <button
+                                    key={option.value}
+                                    className={`status-button ${status === option.value ? 'active' : ''}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Prevent card click
+                                        handleStatusChange(selectedArea, topic.name, status);
+                                    }}
+                                    style={{ backgroundColor: option.color }}
+                                >
+                                    {option.icon}
+                                    {option.label}
+                                </button>
+                            ))}
+                          </div>
                         </div>
                       );
                     })}
