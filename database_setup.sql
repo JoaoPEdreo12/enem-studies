@@ -212,8 +212,10 @@ CREATE INDEX IF NOT EXISTS idx_enem_journey_status ON enem_journey(status);
 CREATE OR REPLACE FUNCTION handle_new_user() 
 RETURNS TRIGGER AS $$
 BEGIN
+  -- Inserir perfil básico (evita conflitos usando ON CONFLICT)
   INSERT INTO user_profiles (user_id, full_name)
-  VALUES (NEW.id, NEW.raw_user_meta_data->>'full_name');
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name', 'Usuário'))
+  ON CONFLICT (user_id) DO NOTHING;
   
   -- Inserir conteúdos iniciais da jornada ENEM para o novo usuário
   INSERT INTO enem_journey (user_id, area, content, percentage, difficulty) VALUES
@@ -286,9 +288,15 @@ BEGIN
   (NEW.id, 'Ciências Humanas', 'Filosofia Moderna', 12.7, 'difícil'),
   (NEW.id, 'Ciências Humanas', 'Ética e Moral', 10.5, 'médio'),
   (NEW.id, 'Ciências Humanas', 'Filosofia Política', 9.2, 'médio'),
-  (NEW.id, 'Ciências Humanas', 'Filosofia Antiga', 7.6, 'difícil');
+  (NEW.id, 'Ciências Humanas', 'Filosofia Antiga', 7.6, 'difícil')
+  ON CONFLICT (user_id, area, content) DO NOTHING;
   
   RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    -- Se houver erro, apenas loga e continua
+    RAISE LOG 'Erro ao criar dados iniciais para usuário %: %', NEW.id, SQLERRM;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

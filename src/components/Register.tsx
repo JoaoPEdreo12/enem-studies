@@ -57,11 +57,14 @@ export default function Register() {
     if (authError) {
       setError(authError.message)
     } else {
-      // Inserir dados adicionais na tabela user_profiles
+      // Aguardar um pouco para o trigger funcionar
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Inserir ou atualizar dados adicionais na tabela user_profiles
       if (authData.user) {
         const { error: profileError } = await supabase
           .from('user_profiles')
-          .insert({
+          .upsert({
             user_id: authData.user.id,
             full_name: fullName,
             phone: phone,
@@ -78,6 +81,8 @@ export default function Register() {
         if (profileError) {
           console.error('Erro ao salvar perfil:', profileError)
           setError('Erro ao salvar perfil do usuário')
+          setLoading(false)
+          return
         }
       }
 
