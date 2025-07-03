@@ -10,6 +10,7 @@ interface TaskBoardProps {
   onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;
   onToggleComplete: (task: Task) => void;
+  user: any;
 }
 
 // Função utilitária para pegar a data de hoje em Brasília (YYYY-MM-DD) usando date-fns-tz
@@ -21,7 +22,7 @@ function getTodayInBrasilia() {
 }
 
 // Componente principal do quadro de tarefas
-export default function TaskBoard({ tasks, subjects, onEdit, onDelete, onToggleComplete }: TaskBoardProps) {
+export default function TaskBoard({ tasks, subjects, onEdit, onDelete, onToggleComplete, user }: TaskBoardProps) {
   // Filtros e busca
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,7 +76,7 @@ export default function TaskBoard({ tasks, subjects, onEdit, onDelete, onToggleC
             ))}
           </select>
         </div>
-        
+
         <div className="relative">
           <input
             type="text"
@@ -202,4 +203,4 @@ export default function TaskBoard({ tasks, subjects, onEdit, onDelete, onToggleC
       )}
     </div>
   );
-} 
+}

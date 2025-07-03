@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { CheckCircle, Clock, Play, Sparkles, Smile, Trophy, Target, BookOpen } from 'lucide-react';
 import { useSupabaseEnemJourney } from '../hooks/useSupabaseEnemJourney';
 
+interface JornadaEnemProps {
+  user: any;
+}
+
 // Dados dos conteúdos do ENEM organizados por área
 const ENEM_CONTENTS = [
   {
@@ -149,7 +153,7 @@ const AvatarEstudante = () => {
   );
 };
 
-export default function JornadaEnem({ user }: { user: any }) {
+export default function JornadaEnem({ user }: JornadaEnemProps) {
   const { journey, loading, updateStatus } = useSupabaseEnemJourney(user?.id || null);
   const [selectedArea, setSelectedArea] = useState<string | null>(ENEM_CONTENTS[0].area);
 
@@ -164,14 +168,20 @@ export default function JornadaEnem({ user }: { user: any }) {
   const areaConcluidos = journey.filter(j => j.status === 'concluido' && j.area === selectedArea).length;
   const areaProgresso = Math.round((areaConcluidos / areaTotal) * 100);
 
-  // Encontrar o tópico atual (primeiro "a fazer" ou "em progresso")
-  const currentTopicIndex = areaObj.topics.findIndex(topic => {
+  // Encontrar o primeiro tópico "em progresso" ou o primeiro "a fazer"
+  const currentProgressIndex = areaObj.topics.findIndex(topic => {
     const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status || 'a fazer';
-    return status === 'a fazer' || status === 'em progresso';
+    return status === 'em progresso';
   });
 
-  // Se não encontrou nenhum "a fazer" ou "em progresso", usar o último tópico
-  const avatarTopicIndex = currentTopicIndex === -1 ? areaObj.topics.length - 1 : currentTopicIndex;
+  const currentTodoIndex = areaObj.topics.findIndex(topic => {
+    const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status || 'a fazer';
+    return status === 'a fazer';
+  });
+
+  // Priorizar tópico em progresso, senão usar o primeiro "a fazer"
+  const avatarTopicIndex = currentProgressIndex !== -1 ? currentProgressIndex : 
+                          (currentTodoIndex !== -1 ? currentTodoIndex : 0);
 
   // Agrupar tópicos por dificuldade
   const topicsByDifficulty = areaObj.topics.reduce((acc, topic) => {
@@ -295,7 +305,7 @@ export default function JornadaEnem({ user }: { user: any }) {
                     {difficulty}
                   </h5>
                   <div className="topics-grid">
-                    {topics.map((topic, index) => {
+                    {topics.map((topic) => {
                       const status = journey.find(j => 
                         j.area === selectedArea && j.content === topic.name
                       )?.status || 'a fazer';
@@ -336,13 +346,18 @@ export default function JornadaEnem({ user }: { user: any }) {
                                     key={option.value}
                                     className={`status-button ${status === option.value ? 'active' : ''}`}
                                     onClick={(e) => {
-                                        e.stopPropagation(); // Prevent card click
-                                        handleStatusChange(selectedArea, topic.name, status);
+                                        e.stopPropagation();
+                                        updateStatus(selectedArea, topic.name, option.value);
                                     }}
-                                    style={{ backgroundColor: option.color }}
+                                    style={{ 
+                                      '--btn-color': option.color,
+                                      backgroundColor: status === option.value ? option.color : 'transparent',
+                                      borderColor: option.color,
+                                      color: status === option.value ? 'white' : option.color
+                                    } as React.CSSProperties}
                                 >
                                     {option.icon}
-                                    {option.label}
+                                    <span className="status-label">{option.label}</span>
                                 </button>
                             ))}
                           </div>

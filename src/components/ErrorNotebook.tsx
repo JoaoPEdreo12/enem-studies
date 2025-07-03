@@ -312,4 +312,4 @@ function ErrorNotebook({ errors, addError, updateError, deleteError, subjects }:
   );
 }
 
-export default ErrorNotebook; 
+export default ErrorNotebook;

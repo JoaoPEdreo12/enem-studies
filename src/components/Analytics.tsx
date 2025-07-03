@@ -5,17 +5,24 @@ import { useSupabaseSubjects } from '../hooks/useSupabaseSubjects';
 import { useSupabaseFlashcards } from '../hooks/useSupabaseFlashcards';
 import { useSupabaseErrorNotebook } from '../hooks/useSupabaseErrorNotebook';
 import { supabase } from '../supabaseClient';
+import React, { useMemo } from 'react';
+import { Target, AlertCircle } from 'lucide-react';
+import type { Task, Subject } from '../types';
 
-const Analytics = () => {
+interface AnalyticsProps {
+  user: any;
+}
+
+const Analytics = ({ user }: AnalyticsProps) => {
   // Estado para o usuário autenticado
-  const [user, setUser] = useState<any>(null);
+  const [userState, setUserState] = useState<any>(null);
 
   // Autenticação: mantém usuário logado e escuta mudanças
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange((_, session) => {
-      setUser(session?.user ?? null)
+      setUserState(session?.user ?? null)
     })
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
+    supabase.auth.getSession().then(({ data }) => setUserState(data.session?.user ?? null))
     return () => { listener?.subscription.unsubscribe() }
   }, [])
 
@@ -94,7 +101,7 @@ const Analytics = () => {
     const today = new Date();
     const diffTime = date.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return 'Hoje';
     if (diffDays === 1) return 'Amanhã';
     if (diffDays < 7) return `Em ${diffDays} dias`;
@@ -106,7 +113,7 @@ const Analytics = () => {
   const getCorrectCount = (f: any) => f.correctCount || f.correct_count || 0;
   const getWrongCount = (f: any) => f.wrongCount || f.wrong_count || 0;
   const getNextReview = (f: any) => f.nextReview || f.next_review;
-  
+
   const flashcardStats = allSubjects.map(subject => {
     const cards = allFlashcards.filter((f: any) => getFlashcardSubjectId(f) === subject.id);
     const correct = cards.reduce((acc: number, c: any) => acc + getCorrectCount(c), 0);
@@ -136,7 +143,7 @@ const Analytics = () => {
       })
       .sort((a, b) => new Date(getNextReview(a)).getTime() - new Date(getNextReview(b)).getTime())
       .slice(0, 3);
-    
+
     return {
       subject,
       total: subjectCards.length,
@@ -149,43 +156,43 @@ const Analytics = () => {
   // Estatísticas de revisão do caderno de erros
   const errorReviewStats = allSubjects.map(subject => {
     const subjectErrors = allErrors.filter((e: any) => getErrorSubjectId(e) === subject.id);
-    
+
     // Calcular próximas revisões baseado no sistema de revisão espaçada
     const readyForReview = subjectErrors.filter((e: any) => {
       const reviewDates = getReviewDates(e);
       if (reviewDates.length === 0) return true; // Erros novos sempre aparecem
-      
+
       // Sistema de revisão espaçada: 1, 3, 7, 14, 30 dias
       const intervals = [1, 3, 7, 14, 30];
       const lastReview = new Date(reviewDates[reviewDates.length - 1]);
       const nextReviewDate = new Date(lastReview);
       nextReviewDate.setDate(lastReview.getDate() + intervals[Math.min(reviewDates.length - 1, intervals.length - 1)]);
-      
+
       return nextReviewDate <= now;
     });
-    
+
     const overdue = subjectErrors.filter((e: any) => {
       const reviewDates = getReviewDates(e);
       if (reviewDates.length === 0) return false;
-      
+
       const intervals = [1, 3, 7, 14, 30];
       const lastReview = new Date(reviewDates[reviewDates.length - 1]);
       const nextReviewDate = new Date(lastReview);
       nextReviewDate.setDate(lastReview.getDate() + intervals[Math.min(reviewDates.length - 1, intervals.length - 1)]);
-      
+
       return nextReviewDate < now;
     });
-    
+
     const nextReviews = subjectErrors
       .filter((e: any) => {
         const reviewDates = getReviewDates(e);
         if (reviewDates.length === 0) return false;
-        
+
         const intervals = [1, 3, 7, 14, 30];
         const lastReview = new Date(reviewDates[reviewDates.length - 1]);
         const nextReviewDate = new Date(lastReview);
         nextReviewDate.setDate(lastReview.getDate() + intervals[Math.min(reviewDates.length - 1, intervals.length - 1)]);
-        
+
         return nextReviewDate > now;
       })
       .map((e: any) => {
@@ -194,7 +201,7 @@ const Analytics = () => {
         const lastReview = new Date(reviewDates[reviewDates.length - 1]);
         const nextReviewDate = new Date(lastReview);
         nextReviewDate.setDate(lastReview.getDate() + intervals[Math.min(reviewDates.length - 1, intervals.length - 1)]);
-        
+
         return {
           ...e,
           nextReviewDate: nextReviewDate.toISOString()
@@ -202,7 +209,7 @@ const Analytics = () => {
       })
       .sort((a, b) => new Date(a.nextReviewDate).getTime() - new Date(b.nextReviewDate).getTime())
       .slice(0, 3);
-    
+
     return {
       subject,
       total: subjectErrors.length,
@@ -568,4 +575,4 @@ const Analytics = () => {
   );
 };
 
-export default Analytics; 
+export default Analytics;

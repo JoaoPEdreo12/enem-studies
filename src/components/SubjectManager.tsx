@@ -1,3 +1,12 @@
+import React, { useState } from 'react';
+import { Books, Plus, Edit, Trash2, Palette } from 'lucide-react';
+import type { Subject } from '../types';
+import SubjectForm from './SubjectForm';
+import { useSupabaseSubjects } from '../hooks/useSupabaseSubjects';
+
+interface SubjectManagerProps {
+  user: any;
+}
 import type { Subject } from '../types';
 import { Trash2, Edit, BookOpen, Plus, Palette, Star } from 'lucide-react';
 import { useState } from 'react';
@@ -12,7 +21,7 @@ interface SubjectManagerProps {
 
 const SubjectManager = ({ subjects, onEdit, onDelete, addSubject }: SubjectManagerProps) => {
   const [showForm, setShowForm] = useState(false)
-  
+
   const handleCreate = (data: any) => {
     addSubject(data)
     setShowForm(false)
@@ -71,7 +80,7 @@ const SubjectManager = ({ subjects, onEdit, onDelete, addSubject }: SubjectManag
             </p>
           </div>
         </div>
-        
+
         <button 
           onClick={() => setShowForm(true)} 
           className="btn btn-gradient-primary hover-lift flex items-center gap-2 px-6 py-3 text-base font-semibold"
@@ -163,7 +172,7 @@ const SubjectManager = ({ subjects, onEdit, onDelete, addSubject }: SubjectManag
                   </button>
                 </div>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1">
@@ -174,13 +183,13 @@ const SubjectManager = ({ subjects, onEdit, onDelete, addSubject }: SubjectManag
                     {getPriorityLabel(subject.priority)}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <Palette className="text-gray-400" size={16} />
                   <span className="text-gray-400 text-sm">Categoria:</span>
                   <span className="text-white text-sm font-medium">{subject.category}</span>
                 </div>
-                
+
                 <div className="flex items-center gap-3 pt-2">
                   <span className="inline-block w-6 h-6 rounded-full border-2 border-white/20 shadow-md mr-2" style={{ backgroundColor: subject.color, verticalAlign: 'middle' }} />
                   <span className="text-gray-400 text-sm">Cor da matéria</span>
