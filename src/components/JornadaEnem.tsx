@@ -113,49 +113,51 @@ const ENEM_CONTENTS = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'não iniciado', label: 'Não Iniciado', icon: <Clock className="text-gray-400" size={16} /> },
-  { value: 'em progresso', label: 'Em Progresso', icon: <Play className="text-blue-400" size={16} /> },
-  { value: 'revisando', label: 'Revisando', icon: <Sparkles className="text-yellow-400" size={16} /> },
-  { value: 'dominado', label: 'Dominado', icon: <CheckCircle className="text-green-400" size={16} /> },
+  { value: 'a fazer', label: 'A Fazer', icon: <Clock className="text-gray-400" size={16} />, color: '#6B7280' },
+  { value: 'em progresso', label: 'Em Progresso', icon: <Play className="text-blue-400" size={16} />, color: '#3B82F6' },
+  { value: 'concluido', label: 'Concluído', icon: <CheckCircle className="text-green-400" size={16} />, color: '#10B981' },
 ];
 
 // Avatar/Mascote estudante melhorado
-const AvatarEstudante = ({ isActive = false, position = 0 }) => (
-  <div className={`avatar-estudante ${isActive ? 'avatar-active' : ''}`} style={{ transform: `translateX(${position * 120}px)` }}>
-    <div className="avatar-container">
-      <div className="avatar-head">
-        <div className="avatar-face">
-          <div className="avatar-eyes">
-            <div className="eye left-eye"></div>
-            <div className="eye right-eye"></div>
+const AvatarEstudante = ({ topicIndex, totalTopics }) => {
+  const progressPercentage = totalTopics > 0 ? (topicIndex / totalTopics) * 100 : 0;
+  
+  return (
+    <div 
+      className="avatar-estudante-container"
+      style={{
+        position: 'absolute',
+        left: `${progressPercentage}%`,
+        top: '-60px',
+        transform: 'translateX(-50%)',
+        zIndex: 10
+      }}
+    >
+      <div className="avatar-estudante">
+        <div className="avatar-head">
+          <div className="avatar-face">
+            <div className="avatar-eyes">
+              <div className="eye left-eye"></div>
+              <div className="eye right-eye"></div>
+            </div>
+            <div className="avatar-mouth"></div>
           </div>
-          <div className="avatar-mouth"></div>
+          <div className="avatar-cap">
+            <div className="cap-visor"></div>
+            <div className="cap-top">🎓</div>
+          </div>
         </div>
-        <div className="avatar-cap">
-          <div className="cap-visor"></div>
-          <div className="cap-top">🎓</div>
+        <div className="avatar-body">
+          <div className="avatar-shirt"></div>
         </div>
-      </div>
-      <div className="avatar-body">
-        <div className="avatar-shirt"></div>
-        <div className="avatar-arms">
-          <div className="arm left-arm"></div>
-          <div className="arm right-arm"></div>
-        </div>
-        <div className="avatar-legs">
-          <div className="leg left-leg"></div>
-          <div className="leg right-leg"></div>
-        </div>
-      </div>
-      {isActive && (
         <div className="progress-indicator">
           <div className="progress-sparkles">✨</div>
           <div className="progress-text">Estudando!</div>
         </div>
-      )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function JornadaEnem({ user }: { user: any }) {
   const { journey, loading, updateStatus } = useSupabaseEnemJourney(user?.id || null);
@@ -163,14 +165,23 @@ export default function JornadaEnem({ user }: { user: any }) {
 
   // Progresso geral
   const total = ENEM_CONTENTS.reduce((acc, area) => acc + area.topics.length, 0);
-  const dominados = journey.filter(j => j.status === 'dominado').length;
-  const progresso = Math.round((dominados / total) * 100);
+  const concluidos = journey.filter(j => j.status === 'concluido').length;
+  const progresso = Math.round((concluidos / total) * 100);
 
   // Progresso por área
   const areaObj = ENEM_CONTENTS.find(a => a.area === selectedArea)!;
   const areaTotal = areaObj.topics.length;
-  const areaDominados = journey.filter(j => j.status === 'dominado' && j.area === selectedArea).length;
-  const areaProgresso = Math.round((areaDominados / areaTotal) * 100);
+  const areaConcluidos = journey.filter(j => j.status === 'concluido' && j.area === selectedArea).length;
+  const areaProgresso = Math.round((areaConcluidos / areaTotal) * 100);
+
+  // Encontrar o tópico atual (primeiro "a fazer" ou "em progresso")
+  const currentTopicIndex = areaObj.topics.findIndex(topic => {
+    const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status || 'a fazer';
+    return status === 'a fazer' || status === 'em progresso';
+  });
+
+  // Se não encontrou nenhum "a fazer" ou "em progresso", usar o último tópico
+  const avatarTopicIndex = currentTopicIndex === -1 ? areaObj.topics.length - 1 : currentTopicIndex;
 
   // Agrupar tópicos por dificuldade
   const topicsByDifficulty = areaObj.topics.reduce((acc, topic) => {
@@ -180,13 +191,12 @@ export default function JornadaEnem({ user }: { user: any }) {
     return acc;
   }, {} as Record<string, typeof areaObj.topics>);
 
-  // Encontrar posição do avatar
-  const currentTopicIdx = areaObj.topics.findIndex(topic => {
-    const status = journey.find(j => j.area === areaObj.area && j.content === topic.name)?.status;
-    return status === 'não iniciado' || status === 'em progresso';
-  });
-
-  const avatarPosition = currentTopicIdx === -1 ? areaObj.topics.length - 1 : currentTopicIdx;
+  const handleStatusChange = (area: string, content: string, currentStatus: string) => {
+    const statusFlow = ['a fazer', 'em progresso', 'concluido'];
+    const currentIndex = statusFlow.indexOf(currentStatus);
+    const nextStatus = statusFlow[(currentIndex + 1) % statusFlow.length];
+    updateStatus(area, content, nextStatus);
+  };
 
   return (
     <div className="jornada-enem-container">
@@ -215,7 +225,7 @@ export default function JornadaEnem({ user }: { user: any }) {
               <div className="progress-bar" style={{width: `${progresso}%`}}></div>
             </div>
             <p className="text-gray-300 mt-2 text-center">
-              {dominados} de {total} conteúdos dominados
+              {concluidos} de {total} conteúdos concluídos
             </p>
           </div>
         </div>
@@ -251,7 +261,7 @@ export default function JornadaEnem({ user }: { user: any }) {
             <div className="area-progress">
               <div className="progress-info">
                 <span className="progress-text">Progresso: {areaProgresso}%</span>
-                <span className="progress-count">({areaDominados}/{areaTotal})</span>
+                <span className="progress-count">({areaConcluidos}/{areaTotal})</span>
               </div>
               <div className="progress-bar-container">
                 <div 
@@ -274,9 +284,21 @@ export default function JornadaEnem({ user }: { user: any }) {
               </h4>
             </div>
             
-            {/* Avatar posicionado */}
-            <div className="avatar-track">
-              <AvatarEstudante isActive={true} position={avatarPosition} />
+            {/* Linha de progresso com avatar posicionado */}
+            <div className="progress-track-container">
+              <div className="progress-track">
+                <div 
+                  className="progress-track-fill" 
+                  style={{
+                    width: `${areaProgresso}%`,
+                    backgroundColor: areaObj.color
+                  }}
+                ></div>
+                <AvatarEstudante 
+                  topicIndex={avatarTopicIndex} 
+                  totalTopics={areaObj.topics.length - 1}
+                />
+              </div>
             </div>
 
             {/* Conteúdos por Dificuldade */}
@@ -287,32 +309,35 @@ export default function JornadaEnem({ user }: { user: any }) {
                     {difficulty}
                   </h5>
                   <div className="topics-grid">
-                    {topics.map((topic, index) => {
+                    {topics.map((topic) => {
                       const status = journey.find(j => 
                         j.area === selectedArea && j.content === topic.name
-                      )?.status || 'não iniciado';
+                      )?.status || 'a fazer';
                       
-                      const globalIndex = areaObj.topics.findIndex(t => t.name === topic.name);
-                      const isCurrentTopic = globalIndex === avatarPosition;
+                      const statusOption = STATUS_OPTIONS.find(opt => opt.value === status);
+                      const isCurrentTopic = areaObj.topics.findIndex(t => t.name === topic.name) === avatarTopicIndex;
 
                       return (
                         <div 
                           key={topic.name} 
-                          className={`topic-card ${status} ${isCurrentTopic ? 'current-topic' : ''}`}
-                          onClick={() => updateStatus(selectedArea, topic.name, getNextStatus(status))}
+                          className={`topic-card status-${status.replace(' ', '-')} ${isCurrentTopic ? 'current-topic' : ''}`}
+                          onClick={() => handleStatusChange(selectedArea, topic.name, status)}
                         >
                           <div className="topic-header">
                             <span className="topic-percentage" style={{color: areaObj.color}}>
                               {topic.percentage}
                             </span>
-                            <div className="topic-status">
-                              {STATUS_OPTIONS.find(opt => opt.value === status)?.icon}
+                            <div className="topic-status" style={{color: statusOption?.color}}>
+                              {statusOption?.icon}
                             </div>
                           </div>
                           <h6 className="topic-name">{topic.name}</h6>
                           <div className="topic-footer">
                             <span className={`difficulty-badge ${topic.difficulty?.toLowerCase()}`}>
                               {topic.difficulty}
+                            </span>
+                            <span className={`status-badge status-${status.replace(' ', '-')}`}>
+                              {statusOption?.label}
                             </span>
                           </div>
                           {isCurrentTopic && (
@@ -339,11 +364,4 @@ export default function JornadaEnem({ user }: { user: any }) {
       )}
     </div>
   );
-}
-
-// Função auxiliar para determinar o próximo status
-function getNextStatus(currentStatus: string): string {
-  const statusFlow = ['não iniciado', 'em progresso', 'revisando', 'dominado'];
-  const currentIndex = statusFlow.indexOf(currentStatus);
-  return statusFlow[(currentIndex + 1) % statusFlow.length];
 }
