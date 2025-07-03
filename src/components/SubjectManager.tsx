@@ -1,6 +1,5 @@
-
 import type { Subject } from '../types';
-import { Edit, Trash2, BookOpen, Plus, Palette, Star } from 'lucide-react';
+import { Trash2, BookOpen, Plus, Palette, Star } from 'lucide-react';
 import { useState } from 'react';
 import SubjectForm from './SubjectForm';
 
