@@ -113,17 +113,9 @@ const DIFFICULTY_CONFIG = {
 const StudyAvatar: React.FC<{ isActive: boolean }> = ({ isActive }) => (
   <div className={`study-avatar ${isActive ? 'active' : ''}`}>
     <div className="avatar-container">
-      <div className="avatar-head">
-        <div className="avatar-face">
-          <div className="avatar-eyes">
-            <div className="eye"></div>
-            <div className="eye"></div>
-          </div>
-          <div className="avatar-mouth"></div>
-        </div>
-        <div className="avatar-cap">🎓</div>
+      <div className="avatar-character">
+        👨‍🎓
       </div>
-      <div className="avatar-body"></div>
       {isActive && (
         <div className="study-indicator">
           <Sparkles size={16} />
@@ -179,6 +171,13 @@ export default function JornadaEnem({ user }: JornadaEnemProps) {
     }) : -1;
 
   const avatarTopicIndex = currentTopicIndex !== -1 ? currentTopicIndex : nextTopicIndex;
+
+  // Agrupar tópicos por dificuldade
+  const topicsByDifficulty = {
+    'Básico': selectedAreaData.topics.filter(t => t.difficulty === 'Básico'),
+    'Intermediário': selectedAreaData.topics.filter(t => t.difficulty === 'Intermediário'),
+    'Avançado': selectedAreaData.topics.filter(t => t.difficulty === 'Avançado')
+  };
 
   // Filtrar tópicos
   const filteredTopics = selectedAreaData.topics.filter(topic => {
@@ -286,13 +285,20 @@ export default function JornadaEnem({ user }: JornadaEnemProps) {
                 <div className="area-tab-content">
                   <div className="area-tab-name">{area.area}</div>
                   <div className="area-tab-progress">
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: `${areaProgress}%`, backgroundColor: area.color }}
-                      ></div>
+                    <div className="progress-bar-container">
+                      <div className="progress-bar">
+                        <div 
+                          className="progress-fill" 
+                          style={{ width: `${areaProgress}%`, backgroundColor: area.color }}
+                        ></div>
+                      </div>
+                      <div className="progress-percentage" style={{ color: area.color }}>
+                        {areaProgress}%
+                      </div>
                     </div>
-                    <span className="progress-text">{areaProgress}%</span>
+                    <div className="area-stats-mini">
+                      {areaCompleted}/{area.topics.length} concluídos
+                    </div>
                   </div>
                 </div>
               </button>
@@ -371,7 +377,7 @@ export default function JornadaEnem({ user }: JornadaEnemProps) {
           </div>
         </div>
 
-        {/* Topics Grid */}
+        {/* Topics by Difficulty */}
         <div className="topics-section">
           <h3 className="topics-title">
             <BookOpen size={20} />
@@ -379,83 +385,198 @@ export default function JornadaEnem({ user }: JornadaEnemProps) {
             <span className="topics-count">({filteredTopics.length} tópicos)</span>
           </h3>
           
-          <div className="topics-grid">
-            {filteredTopics.map((topic, index) => {
-              const status = journey.find(j => j.area === selectedArea && j.content === topic.name)?.status || 'a fazer';
-              const statusConfig = getStatusConfig(status);
-              const isCurrentTopic = selectedAreaData.topics.findIndex(t => t.name === topic.name) === avatarTopicIndex;
-              const difficultyConfig = DIFFICULTY_CONFIG[topic.difficulty as keyof typeof DIFFICULTY_CONFIG];
+          {filterDifficulty === 'all' ? (
+            // Mostrar por níveis separados
+            Object.entries(topicsByDifficulty).map(([difficulty, topics]) => {
+              if (topics.length === 0) return null;
+              
+              const difficultyConfig = DIFFICULTY_CONFIG[difficulty as keyof typeof DIFFICULTY_CONFIG];
+              const difficultyFiltered = topics.filter(topic => {
+                const status = journey.find(j => j.area === selectedArea && j.content === topic.name)?.status || 'a fazer';
+                return filterStatus === 'all' || status === filterStatus;
+              });
+
+              if (difficultyFiltered.length === 0) return null;
 
               return (
-                <div 
-                  key={topic.name}
-                  className={`topic-card ${status.replace(' ', '-')} ${isCurrentTopic ? 'current-topic' : ''}`}
-                  style={{
-                    '--topic-color': selectedAreaData.color,
-                    '--status-color': statusConfig.color,
-                    '--difficulty-color': difficultyConfig.color
-                  } as React.CSSProperties}
-                >
-                  {isCurrentTopic && (
-                    <div className="current-topic-indicator">
-                      <StudyAvatar isActive={status === 'em progresso'} />
-                    </div>
-                  )}
-
-                  <div className="topic-header">
-                    <div className="topic-percentage">{topic.percentage}%</div>
-                    <div className="topic-weight">
-                      <Star size={14} />
-                      {topic.weight}
+                <div key={difficulty} className="difficulty-section">
+                  <div className="difficulty-header">
+                    <h4 className="difficulty-title" style={{ color: difficultyConfig.color }}>
+                      {difficultyConfig.icon} Nível {difficulty}
+                    </h4>
+                    <div className="difficulty-progress">
+                      {difficultyFiltered.filter(t => {
+                        const status = journey.find(j => j.area === selectedArea && j.content === t.name)?.status || 'a fazer';
+                        return status === 'concluido';
+                      }).length} / {difficultyFiltered.length} concluídos
                     </div>
                   </div>
+                  
+                  <div className="topics-grid">
+                    {difficultyFiltered.map((topic, index) => {
+                      const status = journey.find(j => j.area === selectedArea && j.content === topic.name)?.status || 'a fazer';
+                      const statusConfig = getStatusConfig(status);
+                      const isCurrentTopic = selectedAreaData.topics.findIndex(t => t.name === topic.name) === avatarTopicIndex;
 
-                  <div className="topic-content">
-                    <h4 className="topic-name">{topic.name}</h4>
-                    
-                    <div className="topic-badges">
-                      <div className="difficulty-badge" style={{ backgroundColor: difficultyConfig.color }}>
-                        {difficultyConfig.icon} {topic.difficulty}
-                      </div>
-                      
-                      <div 
-                        className="status-badge"
-                        style={{ 
-                          backgroundColor: statusConfig.bgColor,
-                          borderColor: statusConfig.borderColor,
-                          color: statusConfig.color
-                        }}
-                      >
-                        {statusConfig.icon}
-                        {statusConfig.label}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="topic-actions">
-                    <div className="status-buttons">
-                      {Object.entries(STATUS_CONFIG).map(([statusKey, config]) => (
-                        <button
-                          key={statusKey}
-                          onClick={() => handleStatusChange(selectedArea, topic.name, statusKey)}
-                          className={`status-button ${status === statusKey ? 'active' : ''}`}
+                      return (
+                        <div 
+                          key={topic.name}
+                          className={`topic-card ${status.replace(' ', '-')} ${isCurrentTopic ? 'current-topic' : ''}`}
                           style={{
-                            '--btn-color': config.color,
-                            backgroundColor: status === statusKey ? config.color : 'transparent',
-                            borderColor: config.color,
-                            color: status === statusKey ? 'white' : config.color
+                            '--topic-color': selectedAreaData.color,
+                            '--status-color': statusConfig.color,
+                            '--difficulty-color': difficultyConfig.color
                           } as React.CSSProperties}
-                          title={`Marcar como ${config.label}`}
                         >
-                          {config.icon}
-                        </button>
-                      ))}
-                    </div>
+                          {isCurrentTopic && (
+                            <div className="current-topic-indicator">
+                              <StudyAvatar isActive={status === 'em progresso'} />
+                            </div>
+                          )}
+
+                          <div className="topic-header">
+                            <div className="topic-percentage">{topic.percentage}%</div>
+                            <div className="topic-weight">
+                              <Star size={14} />
+                              {topic.weight}
+                            </div>
+                          </div>
+
+                          <div className="topic-content">
+                            <h4 className="topic-name">{topic.name}</h4>
+                            
+                            <div className="topic-badges">
+                              <div className="difficulty-badge" style={{ backgroundColor: difficultyConfig.color }}>
+                                {difficultyConfig.icon} {topic.difficulty}
+                              </div>
+                              
+                              <div 
+                                className="status-badge"
+                                style={{ 
+                                  backgroundColor: statusConfig.bgColor,
+                                  borderColor: statusConfig.borderColor,
+                                  color: statusConfig.color
+                                }}
+                              >
+                                {statusConfig.icon}
+                                {statusConfig.label}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="topic-actions">
+                            <div className="status-buttons">
+                              {Object.entries(STATUS_CONFIG).map(([statusKey, config]) => (
+                                <button
+                                  key={statusKey}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleStatusChange(selectedArea, topic.name, statusKey);
+                                  }}
+                                  className={`status-button ${status === statusKey ? 'active' : ''}`}
+                                  style={{
+                                    '--btn-color': config.color,
+                                    backgroundColor: status === statusKey ? config.color : 'transparent',
+                                    borderColor: config.color,
+                                    color: status === statusKey ? 'white' : config.color
+                                  } as React.CSSProperties}
+                                  title={`Marcar como ${config.label}`}
+                                >
+                                  {config.icon}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
-            })}
-          </div>
+            })
+          ) : (
+            // Mostrar filtrado por dificuldade específica
+            <div className="topics-grid">
+              {filteredTopics.map((topic, index) => {
+                const status = journey.find(j => j.area === selectedArea && j.content === topic.name)?.status || 'a fazer';
+                const statusConfig = getStatusConfig(status);
+                const isCurrentTopic = selectedAreaData.topics.findIndex(t => t.name === topic.name) === avatarTopicIndex;
+                const difficultyConfig = DIFFICULTY_CONFIG[topic.difficulty as keyof typeof DIFFICULTY_CONFIG];
+
+                return (
+                  <div 
+                    key={topic.name}
+                    className={`topic-card ${status.replace(' ', '-')} ${isCurrentTopic ? 'current-topic' : ''}`}
+                    style={{
+                      '--topic-color': selectedAreaData.color,
+                      '--status-color': statusConfig.color,
+                      '--difficulty-color': difficultyConfig.color
+                    } as React.CSSProperties}
+                  >
+                    {isCurrentTopic && (
+                      <div className="current-topic-indicator">
+                        <StudyAvatar isActive={status === 'em progresso'} />
+                      </div>
+                    )}
+
+                    <div className="topic-header">
+                      <div className="topic-percentage">{topic.percentage}%</div>
+                      <div className="topic-weight">
+                        <Star size={14} />
+                        {topic.weight}
+                      </div>
+                    </div>
+
+                    <div className="topic-content">
+                      <h4 className="topic-name">{topic.name}</h4>
+                      
+                      <div className="topic-badges">
+                        <div className="difficulty-badge" style={{ backgroundColor: difficultyConfig.color }}>
+                          {difficultyConfig.icon} {topic.difficulty}
+                        </div>
+                        
+                        <div 
+                          className="status-badge"
+                          style={{ 
+                            backgroundColor: statusConfig.bgColor,
+                            borderColor: statusConfig.borderColor,
+                            color: statusConfig.color
+                          }}
+                        >
+                          {statusConfig.icon}
+                          {statusConfig.label}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="topic-actions">
+                      <div className="status-buttons">
+                        {Object.entries(STATUS_CONFIG).map(([statusKey, config]) => (
+                          <button
+                            key={statusKey}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleStatusChange(selectedArea, topic.name, statusKey);
+                            }}
+                            className={`status-button ${status === statusKey ? 'active' : ''}`}
+                            style={{
+                              '--btn-color': config.color,
+                              backgroundColor: status === statusKey ? config.color : 'transparent',
+                              borderColor: config.color,
+                              color: status === statusKey ? 'white' : config.color
+                            } as React.CSSProperties}
+                            title={`Marcar como ${config.label}`}
+                          >
+                            {config.icon}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
