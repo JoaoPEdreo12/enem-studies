@@ -1147,6 +1147,105 @@ p, span, label {
   100% { transform: rotate(360deg); }
 }
 
+/* Estilos para o caminho em zigue-zague da Jornada ENEM */
+.zigzag-path-container {
+  padding: 40px 20px;
+}
+
+.zigzag-path-container svg path {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Animação do mascote */
+.mascote-bounce { 
+  animation: mascote-bounce 1.2s infinite alternate; 
+}
+
+@keyframes mascote-bounce { 
+  0% { transform: translateY(0); } 
+  100% { transform: translateY(-12px); } 
+}
+
+/* Animações de fade-in */
+.animate-fade-in-up { 
+  animation: fade-in-up 0.7s both; 
+}
+
+@keyframes fade-in-up { 
+  0% { opacity: 0; transform: translateY(30px); } 
+  100% { opacity: 1; transform: translateY(0); } 
+}
+
+/* Responsividade do tabuleiro */
+.board-responsive { 
+  max-width: 100vw; 
+  overflow-x: auto; 
+}
+
+@media (max-width: 600px) { 
+  .zigzag-path-container { 
+    max-width: 98vw !important; 
+    padding: 20px 10px;
+  }
+}
+
+/* Botões de filtro de matéria */
+.btn-filtro-materia { 
+  font-size: 1rem; 
+  letter-spacing: 0.01em; 
+  background: linear-gradient(90deg,#23232b 60%,#3b82f6 120%); 
+  color: #fff; 
+  border: 2px solid #3b82f6; 
+  box-shadow: 0 2px 8px #23232b22; 
+  transition: all 0.2s; 
+}
+
+.btn-filtro-ativo { 
+  background: linear-gradient(90deg,#3b82f6 60%,#23232b 120%); 
+  color: #fff; 
+  border-color: #fff; 
+}
+
+.btn-filtro-inativo { 
+  background: #18181b; 
+  color: #60a5fa; 
+  border-color: #3b82f6; 
+}
+
+.btn-filtro-materia:hover { 
+  filter: brightness(1.1); 
+  transform: scale(1.05); 
+}
+
+/* Botões de status da jornada */
+.btn-status-jornada { 
+  font-size: 0.95rem; 
+  border-radius: 999px; 
+  background: #23232b; 
+  color: #60a5fa; 
+  border: 2px solid #3b82f6; 
+  margin-right: 2px; 
+  margin-bottom: 2px; 
+  transition: all 0.18s; 
+}
+
+.btn-status-ativo { 
+  background: #3b82f6; 
+  color: #fff; 
+  border-color: #fff; 
+}
+
+.btn-status-inativo { 
+  background: #18181b; 
+  color: #60a5fa; 
+  border-color: #3b82f6; 
+}
+
+.btn-status-jornada:hover { 
+  filter: brightness(1.1); 
+  transform: scale(1.07); 
+}
+
 .skeleton {
   background: linear-gradient(90deg, var(--color-surface-alt) 25%, var(--color-surface-hover) 50%, var(--color-surface-alt) 75%);
   background-size: 200px 100%;

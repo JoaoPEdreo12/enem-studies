@@ -160,49 +160,129 @@ export default function JornadaEnem({ user }: { user: any }) {
           </button>
         ))}
       </div>
-      {/* Tabuleiro gamificado */}
+      {/* Tabuleiro gamificado em zigue-zague */}
       <div className="relative flex flex-col items-center board-responsive" style={{minHeight:400, width:'100%', overflowX:'auto'}}>
-        <div className="font-bold text-white text-lg mb-2 animate-fade-in">{areaObj.area}</div>
-        <div className="board-container" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:32,position:'relative',minHeight:320}}>
-          {/* Mascote acima do primeiro tópico */}
-          <div style={{height:60, display:'flex', alignItems:'flex-end', justifyContent:'center', width:'100%'}}>
-            <Mascote />
-          </div>
+        <div className="font-bold text-white text-lg mb-4 animate-fade-in">{areaObj.area}</div>
+        
+        {/* Container do caminho em zigue-zague */}
+        <div className="zigzag-path-container" style={{position:'relative', width:'100%', maxWidth:'800px', minHeight:'600px'}}>
+          
+          {/* Mascote no primeiro tópico */}
+          {lastDominatedIdx >= 0 && (
+            <div style={{
+              position:'absolute',
+              top: `${Math.floor(lastDominatedIdx / 2) * 180 + 40}px`,
+              left: lastDominatedIdx % 2 === 0 ? '20%' : '70%',
+              transform: 'translate(-50%, -100%)',
+              zIndex: 10
+            }}>
+              <Mascote />
+            </div>
+          )}
+          
           {areaObj.topics.map((topic, idx) => {
             const status = journey.find(j => j.area === areaObj.area && j.content === topic)?.status || 'não iniciado';
             const statusObj = STATUS_OPTIONS.find(opt => opt.value === status);
             const isLeft = idx % 2 === 0;
-            // Mascote só aparece acima do primeiro tópico
+            const row = Math.floor(idx / 2);
+            const yPosition = row * 180 + 80;
+            const xPosition = isLeft ? '20%' : '70%';
+            
             return (
-              <div key={topic} style={{display:'flex',flexDirection:isLeft?'row':'row-reverse',alignItems:'center',width:'100%',maxWidth:480,position:'relative',marginBottom:8}}>
-                {/* Linha de conexão */}
+              <div key={topic}>
+                {/* Linha de conexão em zigue-zague */}
                 {idx > 0 && (
-                  <div style={{position:'absolute',top:-32,left:isLeft?60:undefined,right:!isLeft?60:undefined,width:2,height:32,background:'#3b82f6',zIndex:0,transition:'background 0.3s'}} />
+                  <svg 
+                    style={{
+                      position: 'absolute',
+                      top: idx % 2 === 1 ? `${yPosition - 80}px` : `${yPosition - 160}px`,
+                      left: 0,
+                      width: '100%',
+                      height: idx % 2 === 1 ? '80px' : '160px',
+                      zIndex: 1,
+                      pointerEvents: 'none'
+                    }}
+                  >
+                    {idx % 2 === 1 ? (
+                      // Linha horizontal da esquerda para a direita
+                      <path
+                        d={`M 20% 80 Q 50% 60 70% 80`}
+                        stroke="#4B5563"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeDasharray="8,4"
+                        className="animate-pulse"
+                      />
+                    ) : (
+                      // Linha diagonal para baixo
+                      <path
+                        d={`M 70% 0 Q 70% 80 20% 160`}
+                        stroke="#4B5563"
+                        strokeWidth="3"
+                        fill="none"
+                        strokeDasharray="8,4"
+                        className="animate-pulse"
+                      />
+                    )}
+                  </svg>
                 )}
-                {/* Espaço para mascote (apenas no primeiro) */}
-                <div style={{width:60,display:'flex',justifyContent:'center',alignItems:'center'}}>
-                  {/* vazio para alinhamento */}
+                
+                {/* Nó do tópico */}
+                <div style={{
+                  position: 'absolute',
+                  top: `${yPosition}px`,
+                  left: xPosition,
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 5
+                }}>
+                  {/* Círculo principal do tópico */}
+                  <div className={`w-24 h-24 rounded-full flex items-center justify-center shadow-xl border-4 transition-all duration-500 ${
+                    status === 'dominado' 
+                      ? 'bg-gradient-to-br from-green-400 to-green-600 border-green-300 scale-110 animate-bounce shadow-green-400/50' 
+                      : status === 'em progresso' 
+                        ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 border-yellow-300 scale-105 animate-pulse shadow-yellow-400/50' 
+                        : 'bg-gradient-to-br from-blue-800 to-blue-900 border-blue-600 shadow-blue-400/30'
+                  }`}>
+                    <div className="text-2xl">
+                      {statusObj?.icon}
+                    </div>
+                  </div>
+                  
+                  {/* Label do tópico */}
+                  <div className={`absolute ${isLeft ? 'left-full ml-4' : 'right-full mr-4'} top-1/2 transform -translate-y-1/2 bg-gray-800/90 backdrop-blur-sm px-3 py-2 rounded-lg border border-gray-600 min-w-[200px]`}>
+                    <div className="font-medium text-white text-sm text-center mb-2">{topic}</div>
+                    
+                    {/* Botões de status */}
+                    <div className="flex gap-1 flex-wrap justify-center">
+                      {STATUS_OPTIONS.map(opt => (
+                        <button
+                          key={opt.value}
+                          onClick={() => updateStatus(areaObj.area, topic, opt.value)}
+                          disabled={loading}
+                          className={`px-2 py-1 rounded-full text-xs font-semibold border transition-all flex items-center gap-1 ${
+                            status === opt.value 
+                              ? 'bg-blue-600 text-white border-blue-400' 
+                              : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600'
+                          }`}
+                        >
+                          <span className="text-xs">{opt.icon}</span>
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Status atual */}
+                    <div className="text-xs text-gray-400 mt-2 text-center">
+                      Status: <span className="font-semibold text-blue-300">{statusObj?.label}</span>
+                    </div>
+                    
+                    {/* Mensagem de conquista */}
+                    {status === 'dominado' && (
+                      <div className="text-green-400 text-xs mt-2 text-center animate-bounce">
+                        Parabéns! <Smile className="inline ml-1" size={12} />
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {/* Casa do tabuleiro */}
-                <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-4 transition-all duration-300 ${status === 'dominado' ? 'bg-green-400/80 border-green-400 scale-110 animate-bounce' : status === 'em progresso' ? 'bg-yellow-400/80 border-yellow-400 scale-105 animate-pulse' : 'bg-blue-900/80 border-blue-700'}`} style={{marginBottom:4,zIndex:2}}>
-                  {statusObj?.icon}
-                </div>
-                <div className="font-medium text-white mb-1 flex items-center gap-2 text-center" style={{minWidth:160}}>{topic}</div>
-                <div className="flex gap-2 items-center mb-2 flex-wrap justify-center" style={{rowGap:6}}>
-                  {STATUS_OPTIONS.map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => updateStatus(areaObj.area, topic, opt.value)}
-                      disabled={loading}
-                      className={`btn-status-jornada px-3 py-1 rounded-full text-xs font-semibold border transition-all flex items-center gap-1 ${status === opt.value ? 'btn-status-ativo' : 'btn-status-inativo'}`}
-                      style={{boxShadow: status === opt.value ? '0 2px 8px #3b82f6aa' : 'none', minWidth:90, justifyContent:'center'}}
-                    >
-                      {opt.icon} {opt.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">Status: <span className="font-semibold text-blue-300">{statusObj?.label}</span></div>
-                {status === 'dominado' && <div className="text-green-400 text-xs mt-2 animate-bounce">Parabéns! Você dominou esse tópico! <Smile className="inline ml-1 animate-bounce" size={16} /></div>}
               </div>
             );
           })}
